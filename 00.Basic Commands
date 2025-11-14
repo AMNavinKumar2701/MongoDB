@@ -1,0 +1,40 @@
+----------------------Force vertical format-------------------------------------------------------------------------------
+If our object gets printed in mixed format,lets horizontal+verical so to force vertical format for all documents:---
+test>config.set("inspectCompact", false);
+📌Optional: Restore printing setiings to Default 
+test>config.reset("inspectCompact");
+----------------------------------------------------------------------------------------------------------------------------
+ ===============================================================
+|MongoDB Spooling Using PowerShell Transcript                   |
+================================================================
+|How to use Start-Transcript & Stop-Transcript|
+----------------------------------------------
+STEP-1:---To start recording all MongoDB (mongosh) commands and outputs into a file, run:
+PS> Start-Transcript "C:\Users\91829\OneDrive\1 MONGODB\1 SPOOL\mongo.log"
+----------------------------------------------
+STEP-2:--- write mongosh--to get into mongoshell
+PS> mongosh
+----------------------------------------------
+step-3:-- write your all mongoDb commands
+> use demo
+> db.test.insertOne({name:"navin"})
+> db.test.find()
+----------------------------------------------
+STEP-4:---After finishing MongoDB work inside mongosh, USE quit()-->to get out from mongosh
+> quit()
+----------------------------------------------
+STEP-5:--- so now you will be in Poer Shell again, Use Stop-Transcript
+PS> Stop-Transcript
+>--------------------------------------------------------------------------------------------
+Full Example Workflow
+--------------------------------------------------------------------
+PS> Start-Transcript "C:\\Users\\91829\\OneDrive\\1 MONGODB\\1 SPOOL\\mongo.log"
+PS> mongosh
+> use demo
+> db.test.insertOne({name:"Navin"})
+> db.test.find()
+> quit()
+PS> Stop-Transcript
+==============================================================================
+
+
