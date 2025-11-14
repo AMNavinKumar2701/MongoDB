@@ -1,0 +1,445 @@
+
+test> show dbs
+admin   40.00 KiB
+config  36.00 KiB
+db1     68.00 KiB
+local   40.00 KiB
+test> use student
+switched to db student
+student> show dbs
+admin   40.00 KiB
+config  36.00 KiB
+db1     68.00 KiB
+local   40.00 KiB
+student> //u won't find the created db because it just creates memory,it will be available
+
+student> //untill u add some collections,fields.Then DB will stored permanently
+
+student> //creating a collection in the database
+
+student> db.createCollection('Stu_details');
+{ ok: 1 }
+student> // showing collections
+
+student> show collections
+Stu_details
+student> // now lets check whether Student DB is permanently Created or not?
+
+student> use test
+switched to db test
+test> show dbs
+admin    40.00 KiB
+config   96.00 KiB
+db1      68.00 KiB
+local    40.00 KiB
+student   8.00 KiB
+test> //now u can see Student DB as permanently created
+
+test> //so lets delete the db1 database
+
+test> // switch to that db
+
+test> use db1
+switched to db db1
+db1> //now drop
+
+db1> db.dropDatabase();
+{ ok: 1, dropped: 'db1' }
+db1> //lets check dropped or not
+
+db1> show dbs
+admin    40.00 KiB
+config   88.00 KiB
+local    40.00 KiB
+student   8.00 KiB
+db1> // so db1 database is deleted permananetly,but you are still on db1?
+
+db1> // so u deleted data in that db1 database but not from Memory permananetly,so to do that switch to another DB
+
+db1> use student
+switched to db student
+student> //now u came out from the db1 database,if u want to store again collection u can still do in that db1 before switching
+
+student> //now we are at student db
+
+student> show collection
+MongoshInvalidInputError: [COMMON-10001] 'collection' is not a valid argument for "show".
+student> show collections
+Stu_details
+student> //lets add one more collection
+
+student> db.createCollection('Staff_details');
+{ ok: 1 }
+student> show collections
+Staff_details
+Stu_details
+student> //now we have two collections so lets Rename the Staff_details collection
+
+student> db.Staff_details.renameCollection('Proffesor_details');
+{ ok: 1 }
+student> show collections
+Proffesor_details
+Stu_details
+student> //now Collection has been renamed
+
+student> //Lets Drop that collection of Professor
+
+student> db.Proffesor_details.drop();
+true
+student> show collections
+Stu_details
+student> //So collection dropped successfully
+
+student> //---------------CRUD OPERATIONS IN MONGODB----------------------
+
+student> //1. INSERT--->i)insertOne() and ii)insertMany()
+
+student> //i)insertOne()--Adding one object
+
+student> db.insertOne(
+... { "name":"Dhruv",
+... "age":22,
+... "class":8
+... });
+TypeError: db.insertOne is not a function
+student> edit
+Opening an editor...
+Error: Command failed with an error: please define an external editor
+student> db.student.insertOne( { "name": "Dhruv", "age": 22, "class": 8 });
+{
+  acknowledged: true,
+  insertedId: ObjectId('691725b06ef0e305e563b112')
+}
+student> db.students.insertOne({
+...   name: "Siva",
+...   projects: [
+...     { title: "E-Commerce DB", tech: ["MongoDB", "Express"] },
+...     { title: "Chat App", tech: ["Node.js", "Socket.io"] }
+...   ]
+... })
+... ;
+{
+  acknowledged: true,
+  insertedId: ObjectId('691725dd6ef0e305e563b113')
+}
+student> //----here i inserted with different DB name but still executed?
+
+student> //because this is another way to create DB,when you inserted some collection into one Db,
+
+student> //It will create if that Collections is not there,in order to save that Fields
+
+student> show collections
+Stu_details
+student
+students
+student> //so we can enter different any collections to store Fields...............
+
+student> //ii)insertmany()--Adding multiple Fields at a time..........
+
+student> db.students.insertMany([
+... { name: "Arjun", age: 20, city: "Salem" },
+... { name: "Nisha", address: { city: "Coimbatore", pincode: 641001 } }]);
+{
+  acknowledged: true,
+  insertedIds: {
+    '0': ObjectId('691727686ef0e305e563b114'),
+    '1': ObjectId('691727686ef0e305e563b115')
+  }
+}
+student> db.students.insertMany(
+...   [
+...     { _id: "X1", name: "Test1" },
+...     { _id: "X2", name: "Test2" },
+...     { _id: "X1", name: "DuplicateId" }  // duplicate _id
+...   ],
+...   { ordered: false }
+... )
+... ;
+Uncaught:
+MongoBulkWriteError: E11000 duplicate key error collection: student.students index: _id_ dup key: { _id: "X1" }
+Result: BulkWriteResult {
+  insertedCount: 2,
+  matchedCount: 0,
+  modifiedCount: 0,
+  deletedCount: 0,
+  upsertedCount: 0,
+  upsertedIds: {},
+  insertedIds: { '0': 'X1', '1': 'X2' }
+}
+Write Errors: [
+  WriteError {
+    err: {
+      index: 2,
+      code: 11000,
+      errmsg: 'E11000 duplicate key error collection: student.students index: _id_ dup key: { _id: "X1" }',
+      errInfo: undefined,
+      op: { _id: 'X1', name: 'DuplicateId' }
+    }
+  }
+]
+student> //so if you try to insert with _id field ,we will get error by defaultly _id will be generated by engine for evry object
+
+student> // so it will think like duplicated key, because the generated _id key is like to be treated as Primary key
+
+student> //so we should not insert _id field,if u want try with different field name-->s_id..no error will come
+
+student> db.students.insertMany([
+... {
+...       title: "Jurassic World: Fallen Kingdom",
+...       genres: [ "Action", "Sci-Fi" ],
+...       runtime: 130,
+...       rated: "PG-13",
+...       year: 2018,
+...       directors: [ "J. A. Bayona" ],
+...       cast: [ "Chris Pratt", "Bryce Dallas Howard", "Rafe Spall" ],
+...       type: "movie"
+...     },
+...     {
+...       title: "Tag",
+...       genres: [ "Comedy", "Action" ],
+...       runtime: 105,
+...       rated: "R",
+...       year: 2018,
+...       directors: [ "Jeff Tomsic" ],
+...       cast: [ "Annabelle Wallis", "Jeremy Renner", "Jon Hamm" ],
+...       type: "movie"
+...     }
+... ]);
+{
+  acknowledged: true,
+  insertedIds: {
+    '0': ObjectId('691729ac6ef0e305e563b116'),
+    '1': ObjectId('691729ac6ef0e305e563b117')
+  }
+}
+student> //Now inserted everything Fine,then wt about Checking the inserted data........
+
+student> // For that we can go [2].Read/Fetch:---------
+
+student> //i)Find()--To read all documents in the collection, pass an empty document
+
+student> db.students.Find();
+TypeError: db.students.Find is not a function
+student> db.students.find();
+[
+  {
+    _id: ObjectId('691725dd6ef0e305e563b113'),
+    name: 'Siva',
+    projects: [
+      { title: 'E-Commerce DB', tech: [ 'MongoDB', 'Express' ] },
+      { title: 'Chat App', tech: [ 'Node.js', 'Socket.io' ] }
+    ]
+  },
+  {
+    _id: ObjectId('691727686ef0e305e563b114'),
+    name: 'Arjun',
+    age: 20,
+    city: 'Salem'
+  },
+  {
+    _id: ObjectId('691727686ef0e305e563b115'),
+    name: 'Nisha',
+    address: { city: 'Coimbatore', pincode: 641001 }
+  },
+  { _id: 'X1', name: 'Test1' },
+  { _id: 'X2', name: 'Test2' },
+  {
+    _id: ObjectId('691729ac6ef0e305e563b116'),
+    title: 'Jurassic World: Fallen Kingdom',
+    genres: [ 'Action', 'Sci-Fi' ],
+    runtime: 130,
+    rated: 'PG-13',
+    year: 2018,
+    directors: [ 'J. A. Bayona' ],
+    cast: [ 'Chris Pratt', 'Bryce Dallas Howard', 'Rafe Spall' ],
+    type: 'movie'
+  },
+  {
+    _id: ObjectId('691729ac6ef0e305e563b117'),
+    title: 'Tag',
+    genres: [ 'Comedy', 'Action' ],
+    runtime: 105,
+    rated: 'R',
+    year: 2018,
+    directors: [ 'Jeff Tomsic' ],
+    cast: [ 'Annabelle Wallis', 'Jeremy Renner', 'Jon Hamm' ],
+    type: 'movie'
+  }
+]
+student> //i)find(document_name):--To select documents which match an equality condition
+
+student> db.students.find({name:"Siva"});
+[
+  {
+    _id: ObjectId('691725dd6ef0e305e563b113'),
+    name: 'Siva',
+    projects: [
+      { title: 'E-Commerce DB', tech: [ 'MongoDB', 'Express' ] },
+      { title: 'Chat App', tech: [ 'Node.js', 'Socket.io' ] }
+    ]
+  }
+]
+student> //ii)findOne():-------Returns one document matching the filter,if not returns null
+
+student> db.students.findOne({type:"movie"});
+{
+  _id: ObjectId('691729ac6ef0e305e563b116'),
+  title: 'Jurassic World: Fallen Kingdom',
+  genres: [ 'Action', 'Sci-Fi' ],
+  runtime: 130,
+  rated: 'PG-13',
+  year: 2018,
+  directors: [ 'J. A. Bayona' ],
+  cast: [ 'Chris Pratt', 'Bryce Dallas Howard', 'Rafe Spall' ],
+  type: 'movie'
+}
+student> //only one document it will give even if u have multiple
+
+student> db.students.findOne({type:"movie"});
+{
+  _id: ObjectId('691729ac6ef0e305e563b116'),
+  title: 'Jurassic World: Fallen Kingdom',
+  genres: [ 'Action', 'Sci-Fi' ],
+  runtime: 130,
+  rated: 'PG-13',
+  year: 2018,
+  directors: [ 'J. A. Bayona' ],
+  cast: [ 'Chris Pratt', 'Bryce Dallas Howard', 'Rafe Spall' ],
+  type: 'movie'
+}
+student> db.students.findOne({type:"Movie"});
+null
+student> //so not found means null, Also value for the Field is Case-sensitive
+
+student> //[3].UPDATE – updateOne(), updateMany(), replaceOne()
+
+student> //$set is used to update the values of a field
+
+student> //3.1)updateOne()--Updates first matching document.
+
+student> //update the age of Arjun as 25
+
+student> db.students.updateOne(
+... {name:"Arjun"},{$set:{age:25}});
+{
+  acknowledged: true,
+  insertedId: null,
+  matchedCount: 1,
+  modifiedCount: 1,
+  upsertedCount: 0
+}
+student> db.students.find({name:'Arjun'});
+[
+  {
+    _id: ObjectId('691727686ef0e305e563b114'),
+    name: 'Arjun',
+    age: 25,
+    city: 'Salem'
+  }
+]
+student> //so age is changed as 25.
+
+student> //3.2 updateMany()----Updates all documents matching the filter.
+
+student> //update year as 2025 for all type of movies
+
+student> db.students.updateMany(
+... {type:'movie'},{$set:{year:2025}});
+{
+  acknowledged: true,
+  insertedId: null,
+  matchedCount: 2,
+  modifiedCount: 2,
+  upsertedCount: 0
+}
+student> db.students.find(type:'movie');
+Uncaught:
+SyntaxError: Unexpected token, expected "," (1:21)
+
+> 1 | db.students.find(type:'movie');
+    |                      ^
+  2 |
+
+student> db.students.find({type:'movie'});
+[
+  {
+    _id: ObjectId('691729ac6ef0e305e563b116'),
+    title: 'Jurassic World: Fallen Kingdom',
+    genres: [ 'Action', 'Sci-Fi' ],
+    runtime: 130,
+    rated: 'PG-13',
+    year: 2025,
+    directors: [ 'J. A. Bayona' ],
+    cast: [ 'Chris Pratt', 'Bryce Dallas Howard', 'Rafe Spall' ],
+    type: 'movie'
+  },
+  {
+    _id: ObjectId('691729ac6ef0e305e563b117'),
+    title: 'Tag',
+    genres: [ 'Comedy', 'Action' ],
+    runtime: 105,
+    rated: 'R',
+    year: 2025,
+    directors: [ 'Jeff Tomsic' ],
+    cast: [ 'Annabelle Wallis', 'Jeremy Renner', 'Jon Hamm' ],
+    type: 'movie'
+  }
+]
+student> //3.3 replaceOne()-------Replaces entire document (except _id) with a new one.[no $set] needed
+
+student> db.students.replaceOne(
+... {name:'Siva'},{name:'Siva',course:"mongoDb"});
+{
+  acknowledged: true,
+  insertedId: null,
+  matchedCount: 1,
+  modifiedCount: 1,
+  upsertedCount: 0
+}
+student>  db.students.find({name:'Siva'});
+[
+  {
+    _id: ObjectId('691725dd6ef0e305e563b113'),
+    name: 'Siva',
+    course: 'mongoDb'
+  }
+]
+student> //DELETE – deleteOne() & deleteMany()
+
+student> //i)deleteOne():-------Deletes first matching document.
+
+student> //delete the Siva object
+
+student> db.students.deleteOne({name:'Siva'});
+{ acknowledged: true, deletedCount: 1 }
+student>  db.students.find({name:'Siva'});
+
+student> //no values of Siva
+
+student> //ii)deleteMany():--------Deletes all matching documents.
+
+student> //delete the type as movie
+
+student> db.students.deleteMany({type:"movie"});
+{ acknowledged: true, deletedCount: 2 }
+student> db.students.find();
+[
+  {
+    _id: ObjectId('691727686ef0e305e563b114'),
+    name: 'Arjun',
+    age: 25,
+    city: 'Salem'
+  },
+  {
+    _id: ObjectId('691727686ef0e305e563b115'),
+    name: 'Nisha',
+    address: { city: 'Coimbatore', pincode: 641001 }
+  },
+  { _id: 'X1', name: 'Test1' },
+  { _id: 'X2', name: 'Test2' }
+]
+student> //no movie Type values/documents
+
+student> quit
+PS C:\Users\91829> stop-Transcript
+Transcript stopped, output file is C:\Users\91829\OneDrive\1 MONGODB\1 SPOOL\DAY_1_CRUD.txt
