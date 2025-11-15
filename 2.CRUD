@@ -1,22 +1,27 @@
-
+-----------------------------------------------------------------------------
 test> show dbs
 admin   40.00 KiB
 config  36.00 KiB
 db1     68.00 KiB
 local   40.00 KiB
+===============================================================================================
+student> //---------------CREATE OPERATIONS IN MONGODB----------------------
+===============================================================================================
 test> use student
 switched to db student
+
 student> show dbs
 admin   40.00 KiB
 config  36.00 KiB
 db1     68.00 KiB
 local   40.00 KiB
+
 student> //u won't find the created db because it just creates memory,it will be available
 
 student> //untill u add some collections,fields.Then DB will stored permanently
-
-student> //creating a collection in the database
-
+-----------------------------------------------------------------------------------
+student> //creating a collection in the database in two ways.one is like this, another one is insertOne()
+-----------------------------------------------------------------------------
 student> db.createCollection('Stu_details');
 { ok: 1 }
 student> // showing collections
@@ -33,6 +38,7 @@ config   96.00 KiB
 db1      68.00 KiB
 local    40.00 KiB
 student   8.00 KiB
+
 test> //now u can see Student DB as permanently created
 
 test> //so lets delete the db1 database
@@ -41,6 +47,7 @@ test> // switch to that db
 
 test> use db1
 switched to db db1
+-----------------------------------------------------------------------------
 db1> //now drop
 
 db1> db.dropDatabase();
@@ -52,16 +59,18 @@ admin    40.00 KiB
 config   88.00 KiB
 local    40.00 KiB
 student   8.00 KiB
+
 db1> // so db1 database is deleted permananetly,but you are still on db1?
 
 db1> // so u deleted data in that db1 database but not from Memory permananetly,so to do that switch to another DB
 
 db1> use student
 switched to db student
+
 student> //now u came out from the db1 database,if u want to store again collection u can still do in that db1 before switching
 
 student> //now we are at student db
-
+-----------------------------------------------------------------------------
 student> show collection
 MongoshInvalidInputError: [COMMON-10001] 'collection' is not a valid argument for "show".
 student> show collections
@@ -73,13 +82,15 @@ student> db.createCollection('Staff_details');
 student> show collections
 Staff_details
 Stu_details
-student> //now we have two collections so lets Rename the Staff_details collection
 
+student> //now we have two collections so lets Rename the Staff_details collection
 student> db.Staff_details.renameCollection('Proffesor_details');
 { ok: 1 }
+
 student> show collections
 Proffesor_details
 Stu_details
+
 student> //now Collection has been renamed
 
 student> //Lets Drop that collection of Professor
@@ -89,8 +100,8 @@ true
 student> show collections
 Stu_details
 student> //So collection dropped successfully
-
-student> //---------------CRUD OPERATIONS IN MONGODB----------------------
+-----------------------------------------------------------------------------
+student> //---------------INSERT OPERATIONS IN MONGODB----------------------
 
 student> //1. INSERT--->i)insertOne() and ii)insertMany()
 
@@ -213,7 +224,8 @@ student> db.students.insertMany([
   }
 }
 student> //Now inserted everything Fine,then wt about Checking the inserted data........
-
+===============================================================================================
+student> //---------------READ/FETCH OPERATIONS IN MONGODB----------------------
 student> // For that we can go [2].Read/Fetch:---------
 
 student> //i)Find()--To read all documents in the collection, pass an empty document
