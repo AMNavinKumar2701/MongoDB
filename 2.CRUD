@@ -49,7 +49,7 @@ test> use db1
 switched to db db1
 -----------------------------------------------------------------------------
 db1> //now drop
-
+===============================================================================================
 db1> db.dropDatabase();
 { ok: 1, dropped: 'db1' }
 db1> //lets check dropped or not
@@ -76,7 +76,7 @@ MongoshInvalidInputError: [COMMON-10001] 'collection' is not a valid argument fo
 student> show collections
 Stu_details
 student> //lets add one more collection
-
+===============================================================================================
 student> db.createCollection('Staff_details');
 { ok: 1 }
 student> show collections
@@ -101,12 +101,13 @@ student> show collections
 Stu_details
 student> //So collection dropped successfully
 -----------------------------------------------------------------------------
+===============================================================================================
 student> //---------------INSERT OPERATIONS IN MONGODB----------------------
-
+===============================================================================================
 student> //1. INSERT--->i)insertOne() and ii)insertMany()
 
 student> //i)insertOne()--Adding one object
-
+===============================================================================================
 student> db.insertOne(
 ... { "name":"Dhruv",
 ... "age":22,
@@ -144,9 +145,9 @@ Stu_details
 student
 students
 student> //so we can enter different any collections to store Fields...............
-
+===============================================================================================
 student> //ii)insertmany()--Adding multiple Fields at a time..........
-
+===============================================================================================
 student> db.students.insertMany([
 ... { name: "Arjun", age: 20, city: "Salem" },
 ... { name: "Nisha", address: { city: "Coimbatore", pincode: 641001 } }]);
@@ -226,10 +227,11 @@ student> db.students.insertMany([
 student> //Now inserted everything Fine,then wt about Checking the inserted data........
 ===============================================================================================
 student> //---------------READ/FETCH OPERATIONS IN MONGODB----------------------
+===============================================================================================
 student> // For that we can go [2].Read/Fetch:---------
-
+===============================================================================================
 student> //i)Find()--To read all documents in the collection, pass an empty document
-
+===============================================================================================
 student> db.students.Find();
 TypeError: db.students.Find is not a function
 student> db.students.find();
@@ -278,8 +280,9 @@ student> db.students.find();
     type: 'movie'
   }
 ]
+===============================================================================================
 student> //i)find(document_name):--To select documents which match an equality condition
-
+===============================================================================================
 student> db.students.find({name:"Siva"});
 [
   {
@@ -291,8 +294,9 @@ student> db.students.find({name:"Siva"});
     ]
   }
 ]
+===============================================================================================
 student> //ii)findOne():-------Returns one document matching the filter,if not returns null
-
+===============================================================================================
 student> db.students.findOne({type:"movie"});
 {
   _id: ObjectId('691729ac6ef0e305e563b116'),
@@ -322,13 +326,15 @@ student> db.students.findOne({type:"movie"});
 student> db.students.findOne({type:"Movie"});
 null
 student> //so not found means null, Also value for the Field is Case-sensitive
-
+===============================================================================================
+student> //---------------UPDATE/REPLACE OPERATIONS IN MONGODB----------------------
+===============================================================================================
 student> //[3].UPDATE – updateOne(), updateMany(), replaceOne()
 
 student> //$set is used to update the values of a field
-
+===============================================================================================
 student> //3.1)updateOne()--Updates first matching document.
-
+===============================================================================================
 student> //update the age of Arjun as 25
 
 student> db.students.updateOne(
@@ -350,9 +356,9 @@ student> db.students.find({name:'Arjun'});
   }
 ]
 student> //so age is changed as 25.
-
+===============================================================================================
 student> //3.2 updateMany()----Updates all documents matching the filter.
-
+===============================================================================================
 student> //update year as 2025 for all type of movies
 
 student> db.students.updateMany(
@@ -397,8 +403,9 @@ student> db.students.find({type:'movie'});
     type: 'movie'
   }
 ]
+===============================================================================================
 student> //3.3 replaceOne()-------Replaces entire document (except _id) with a new one.[no $set] needed
-
+===============================================================================================
 student> db.students.replaceOne(
 ... {name:'Siva'},{name:'Siva',course:"mongoDb"});
 {
@@ -417,7 +424,9 @@ student>  db.students.find({name:'Siva'});
   }
 ]
 student> //DELETE – deleteOne() & deleteMany()
-
+===============================================================================================
+student> //---------------DELETE OPERATIONS IN MONGODB----------------------
+===============================================================================================
 student> //i)deleteOne():-------Deletes first matching document.
 
 student> //delete the Siva object
@@ -427,9 +436,9 @@ student> db.students.deleteOne({name:'Siva'});
 student>  db.students.find({name:'Siva'});
 
 student> //no values of Siva
-
+===============================================================================================
 student> //ii)deleteMany():--------Deletes all matching documents.
-
+===============================================================================================
 student> //delete the type as movie
 
 student> db.students.deleteMany({type:"movie"});
