@@ -1,0 +1,1603 @@
+
+=====================================================================================
+          MONGODB EVALUATION OPERATORS:--Used for advanced expression evaluations.
+=====================================================================================
+
+============================================================
+
+SAMPLE EMP DATA USED FOR OUTPUTS
+--------------------------------
+empno | ename  | job        | sal  | comm | deptno | mgr
+----------------------------------------------------------
+7369  | smith  | clerk      | 800  | null | 20     | 7902
+7499  | allen  | salesman   | 1600 | 300  | 30     | 7698
+7521  | ward   | salesman   | 1250 | 500  | 30     | 7698
+7566  | jones  | manager    | 2975 | null | 20     | 7839
+7654  | martin | salesman   | 1250 | 1400 | 30     | 7698
+7698  | blake  | manager    | 2850 | null | 30     | 7839
+7782  | clark  | manager    | 2450 | null | 10     | 7839
+7788  | scott  | analyst    | 3000 | null | 20     | 7566
+7839  | king   | president  | 5000 | null | 10     | null
+7844  | turner | salesman   | 1500 | 0    | 30     | 7698
+7876  | adams  | clerk      | 1100 | null | 20     | 7788
+7900  | james  | clerk      | 950  | null | 30     | 7698
+7902  | ford   | analyst    | 3000 | null | 20     | 7566
+7934  | miller | clerk      | 1300 | null | 10     | 7782
+
+
+============================================================
+ 1 — $expr OPERATOR  
+============================================================
+Theory:--
+Allows use of aggregation expressions inside find().
+
+Behavior:--
+Can compare fields in same document.
+Can use mathematical operations.
+
+Communication Flow:---------
+Expression is evaluated like mini-aggregation.
+Document values substituted.
+If TRUE → result returned.
+
+-------------------------------------------------------------
+EXAMPLES:-(20 QnA):-
+Q1) WAQTD employees where salary = commission  
+Query:
+db.emp.find({ $expr: { $eq: ["$sal", "$comm"] } })
+Output:
+turner (sal=1500, comm=0)
+
+Q2) WAQTD employees where salary > commission  
+Query:
+db.emp.find({ $expr: { $gt: ["$sal", "$comm"] } })
+Output:
+smith, allen, ward, jones, blake, clark, scott, king, adams, james, ford, miller, turner
+
+Q3) WAQTD employees where salary > comm * 2  
+Query:
+db.emp.find({ $expr: { $gt: ["$sal", { $multiply: ["$comm", 2] }] } })
+Output:
+allen (1600 > 600)  
+turner (1500 > 0)  
+others comm=null ignored
+
+Q4) WAQTD employees where deptno + sal > 3000  
+Query:
+db.emp.find({ $expr: { $gt: [{ $add: ["$deptno", "$sal"] }, 3000] } })
+Output:
+jones, blake, clark, scott, king, ford, miller
+
+Q5) WAQTD employees where sal = deptno * 100  
+Query:
+db.emp.find({ $expr: { $eq: ["$sal", { $multiply: ["$deptno", 100] }] } })
+Output:
+none
+
+Q6) WAQTD employees where sal < deptno * 200  
+Query:
+db.emp.find({ $expr: { $lt: ["$sal", { $multiply: ["$deptno", 200] }] } })
+Output:
+smith, adams
+
+Q7) WAQTD employees where sal = mgr  
+Query:
+db.emp.find({ $expr: { $eq: ["$sal", "$mgr"] } })
+Output:
+none
+
+Q8) WAQTD employees where sal > mgr  
+Query:
+db.emp.find({ $expr: { $gt: ["$sal", "$mgr"] } })
+Output:
+smith, jones, blake, clark, scott, adams, ford
+
+Q9) WAQTD employees where comm < deptno  
+Query:
+db.emp.find({ $expr: { $lt: ["$comm", "$deptno"] } })
+Output:
+turner (0 < 30)
+
+Q10) WAQTD employees where deptno * 10 = sal / 10  
+Query:
+db.emp.find({ $expr: { $eq: [{ $multiply: ["$deptno", 10] }, { $divide: ["$sal", 10] }] } })
+Output:
+none
+
+Q11) WAQTD employees where sal – comm > 1000  
+Query:
+db.emp.find({ $expr: { $gt: [{ $subtract: ["$sal", "$comm"] }, 1000] } })
+Output:
+allen, jones, blake, clark, king, scott, ford
+
+Q12) WAQTD employees where sal + comm > 2000  
+Query:
+db.emp.find({ $expr: { $gt: [{ $add: ["$sal", "$comm"] }, 2000] } })
+Output:
+jones, blake, clark, scott, king, ford
+
+Q13) WAQTD employees where deptno * comm = sal  
+Query:
+db.emp.find({ $expr: { $eq: [{ $multiply: ["$deptno", "$comm"] }, "$sal"] } })
+Output:
+none
+
+Q14) WAQTD employees where sal * 2 > 5000  
+Query:
+db.emp.find({ $expr: { $gt: [{ $multiply: ["$sal", 2] }, 5000] } })
+Output:
+king, scott, ford
+
+Q15) WAQTD employees where comm = 0  
+Query:
+db.emp.find({ $expr: { $eq: ["$comm", 0] } })
+Output:
+turner
+
+Q16) WAQTD employees where sal % 2 = 0 (even salary)  
+Query:
+db.emp.find({ $expr: { $eq: [{ $mod: ["$sal", 2] }, 0] } })
+Output:
+allen, ward, jones, blake, clark, king, turner, ford, miller
+
+Q17) WAQTD employees where deptno % 2 = 1 (odd deptno)  
+Query:
+db.emp.find({ $expr: { $eq: [{ $mod: ["$deptno", 2] }, 1] } })
+Output:
+none
+
+Q18) WAQTD employees where first digit of empno = deptno  
+Query:
+db.emp.find({
+  $expr: {
+    $eq: [
+      { $substr: ["$empno", 0, 1] },
+      { $substr: ["$deptno", 0, 1] }
+    ]
+  }
+})
+Output:
+none
+
+Q19) WAQTD employees where sal / deptno > 50  
+Query:
+db.emp.find({ $expr: { $gt: [{ $divide: ["$sal", "$deptno"] }, 50] } })
+Output:
+allen, ward, jones, martin, blake, clark, king, turner, ford, miller
+
+Q20) WAQTD employees where sal > avg(sal) per dept  
+(Simulated manually, advanced)
+Query:
+db.emp.find({ $expr: { /* complex aggregation */ } })
+Output:
+Not applicable in find() directly
+
+
+==========================================================
+2 — $mod OPERATOR  (20 QnA)
+============================================================
+Theory:--
+Used to find numbers divisible by a value.
+
+Format:--
+{ field: { $mod: [divisor, remainder] } }
+
+Behavior:--
+Only works on number fields.
+Computes: (fieldValue % divisor) == remainder
+
+Communication Flow:---
+Reads numeric value.
+Performs modulo operation.
+Compares result with given remainder.
+------------------------------------------------
+EXAMPLES:-(20 QnA):-
+Q1) WAQTD employees whose empno divisible by 2  
+Query:
+db.emp.find({ empno: { $mod: [2, 0] } })
+Output:
+7369, 7521, 7654, 7698, 7844, 7902
+
+Q2) WAQTD employees whose empno gives remainder 1 when ÷3  
+Query:
+db.emp.find({ empno: { $mod: [3, 1] } })
+Output:
+7499, 7654, 7782, 7839, 7934
+
+Q3) WAQTD employees whose salary divisible by 100  
+Query:
+db.emp.find({ sal: { $mod: [100, 0] } })
+Output:
+smith, allen, ward, martin, blake, clark, scott, king, adams, ford
+
+Q4) WAQTD employees whose deptno % 3 = 0  
+Query:
+db.emp.find({ deptno: { $mod: [3, 0] } })
+Output:
+allen, ward, martin, blake, turner, james
+
+Q5) WAQTD employees whose deptno % 2 = 0  
+Query:
+db.emp.find({ deptno: { $mod: [2, 0] } })
+Output:
+smith, jones, scott, adams, ford
+
+Q6) WAQTD employees where mgr % 10 = 8  
+Query:
+db.emp.find({ mgr: { $mod: [10, 8] } })
+Output:
+7698, 7788, 7698, 7698, 7698
+
+Q7) WAQTD employees where comm % 5 = 0  
+Query:
+db.emp.find({ comm: { $mod: [5, 0] } })
+Output:
+allen, ward, martin, turner
+
+Q8) WAQTD employees whose sal % 4 = 2  
+Query:
+db.emp.find({ sal: { $mod: [4, 2] } })
+Output:
+allen, jones, king
+
+Q9) WAQTD employees where empno % 5 = 4  
+Query:
+db.emp.find({ empno: { $mod: [5, 4] } })
+Output:
+7499, 7698, 7844
+
+Q10) WAQTD employees where sal % 7 = 0  
+Query:
+db.emp.find({ sal: { $mod: [7, 0] } })
+Output:
+smith, ward, martin, turner
+
+Q11) WAQTD employees where deptno % 10 = 0  
+Query:
+db.emp.find({ deptno: { $mod: [10, 0] } })
+Output:
+clark, king, miller
+
+Q12) WAQTD employees where empno % 9 = 0  
+Query:
+db.emp.find({ empno: { $mod: [9, 0] } })
+Output:
+7839
+
+Q13) WAQTD employees where empno % 4 = 1  
+Query:
+db.emp.find({ empno: { $mod: [4, 1] } })
+Output:
+7499, 7698, 7782, 7876, 7934
+
+Q14) WAQTD employees where sal % 50 = 0  
+Query:
+db.emp.find({ sal: { $mod: [50, 0] } })
+Output:
+almost all except:
+king (5000%50=0 yes)
+
+Q15) WAQTD employees where comm % 2 = 0  
+Query:
+db.emp.find({ comm: { $mod: [2, 0] } })
+Output:
+allen, martin
+
+Q16) WAQTD employees where mgr % 100 = 0  
+Query:
+db.emp.find({ mgr: { $mod: [100, 0] } })
+Output:
+7900
+
+Q17) WAQTD employees whose sal % 3 = 2  
+Query:
+db.emp.find({ sal: { $mod: [3, 2] } })
+Output:
+blake, ford
+
+Q18) WAQTD employees where empno % 7 = 5  
+Query:
+db.emp.find({ empno: { $mod: [7, 5] } })
+Output:
+7499, 7782, 7839
+
+Q19) WAQTD employees where deptno % 4 = 2  
+Query:
+db.emp.find({ deptno: { $mod: [4, 2] } })
+Output:
+smith, jones, scott, adams, ford
+
+Q20) WAQTD employees whose mgr % 6 = 3  
+Query:
+db.emp.find({ mgr: { $mod: [6, 3] } })
+Output:
+7902, 7839
+
+
+============================================================
+                     ⭐ 3. $regex Operator
+============================================================
+⭐ 3. $regex Operator:---
+Theory
+Pattern matching using Regular Expressions.
+
+Behavior:---
+Evaluated on string fields only.
+Slower because it scans full string content.
+
+Communication Flow:--
+Query engine converts regex into compiled pattern.
+Iterates over each string value.
+Returns matches.
+
+from docx import Document
+
+text = """FULL REGEX NOTES FOR MONGODB (TXT VERSION)
+
+WHAT IS REGEX?
+Regex = Regular Expression → a pattern used to match text.
+
+MongoDB supports regex in two ways:
+
+1) JavaScript style literal:
+{ field: /pattern/flags }
+
+Example:
+{ ename: /^s/i }
+
+2) Using $regex and $options:
+{ field: { $regex: "pattern", $options: "i" } }
+
+Both behave the same.
+
+------------------------------------------------------------
+PART 2 — IMPORTANT REGEX CHARACTERS (THE COMPLETE DICTIONARY)
+------------------------------------------------------------
+
+A) ANCHORS (start/end)
+
+1) ^  → Starts with
+   Example: ^s   → starts with ‘s’
+
+2) $  → Ends with
+   Example: n$   → ends with ‘n’
+
+------------------------------------------------------------
+
+B) CHARACTER CLASSES
+
+1) .  → Any single character
+   Example: s.m  → sim, sam, som, sum
+
+2) [abc] → One of a, b, c
+   Example: [bsm]ar → bar, sar, mar
+
+3) [^abc] → NOT a, b, c
+   Example: [^s]mith → amith, kmith
+
+4) Ranges:
+   [a-z] → lowercase letters
+   [A-Z] → uppercase letters
+   [0-9] → digits
+
+------------------------------------------------------------
+
+C) PREDEFINED GROUPS
+
+\d → digit  
+\D → NOT digit  
+\w → word character (A–Z, a–z, 0–9, _)  
+\W → NOT word character  
+\s → whitespace  
+\S → NOT whitespace  
+
+------------------------------------------------------------
+
+D) QUANTIFIERS
+
+?      → 0 or 1 time  
+*      → 0 or unlimited times  
++      → 1 or unlimited times  
+{n}    → exactly n times  
+{n,}   → at least n times  
+{n,m}  → between n and m times  
+
+Examples:
+colou?r → color or colour  
+a*      → '', a, aa, aaa  
+a+      → a, aa, aaa  
+\d{4}   → 4 digits  
+\d{2,}  → 2 or more digits  
+\d{2,4} → 2 to 4 digits  
+
+------------------------------------------------------------
+
+E) LOGICAL (OR)
+
+| → OR  
+Example: king|smith → match “king” OR “smith”
+
+------------------------------------------------------------
+
+F) GROUPING AND CAPTURING
+
+() → Group  
+Example: (king|smith)$ → names ending with king or smith
+
+------------------------------------------------------------
+PART 3 — MONGODB REGEX SYNTAX
+------------------------------------------------------------
+
+Syntax A: JS Literal
+db.emp.find({ ename: /^s/ })
+
+Syntax B: Using $regex
+db.emp.find({ ename: { $regex: "^s" } })
+
+FLAGS:
+i → case-insensitive  
+m → multi-line  
+x → ignore whitespace  
+s → dot matches newline  
+
+Example:
+ /^s/i → starts with 's', ignore case
+
+---------------------------------------------------------------
+EXAMPLES:-(100 QnA):-
+MONGODB REGEX - 100 WAQTD QUESTIONS WITH QUERY + EXPECTED OUTPUT
+
+Sample EMP data used (for reference):
+db.emp.insertMany(
+[
+  {
+    "empno": 7369,
+    "ename": "smith",
+    "job": "clerk",
+    "mgr": 7902,
+    "hiredate": "1980-12-17",
+    "sal": 800,
+    "comm": null,
+    "deptno": 20
+  },
+  {
+    "empno": 7499,
+    "ename": "allen",
+    "job": "salesman",
+    "mgr": 7698,
+    "hiredate": "1981-02-20",
+    "sal": 1600,
+    "comm": 300,
+    "deptno": 30
+  },
+  {
+    "empno": 7521,
+    "ename": "ward",
+    "job": "salesman",
+    "mgr": 7698,
+    "hiredate": "1981-02-22",
+    "sal": 1250,
+    "comm": 500,
+    "deptno": 30
+  },
+  {
+    "empno": 7566,
+    "ename": "jones",
+    "job": "manager",
+    "mgr": 7839,
+    "hiredate": "1981-04-02",
+    "sal": 2975,
+    "comm": null,
+    "deptno": 20
+  },
+  {
+    "empno": 7654,
+    "ename": "martin",
+    "job": "salesman",
+    "mgr": 7698,
+    "hiredate": "1981-09-28",
+    "sal": 1250,
+    "comm": 1400,
+    "deptno": 30
+  },
+  {
+    "empno": 7698,
+    "ename": "blake",
+    "job": "manager",
+    "mgr": 7839,
+    "hiredate": "1981-05-01",
+    "sal": 2850,
+    "comm": null,
+    "deptno": 30
+  },
+  {
+    "empno": 7782,
+    "ename": "clark",
+    "job": "manager",
+    "mgr": 7839,
+    "hiredate": "1981-06-09",
+    "sal": 2450,
+    "comm": null,
+    "deptno": 10
+  },
+  {
+    "empno": 7788,
+    "ename": "scott",
+    "job": "analyst",
+    "mgr": 7566,
+    "hiredate": "1987-04-19",
+    "sal": 3000,
+    "comm": null,
+    "deptno": 20
+  },
+  {
+    "empno": 7839,
+    "ename": "king",
+    "job": "president",
+    "mgr": null,
+    "hiredate": "1981-11-17",
+    "sal": 5000,
+    "comm": null,
+    "deptno": 10
+  },
+  {
+    "empno": 7844,
+    "ename": "turner",
+    "job": "salesman",
+    "mgr": 7698,
+    "hiredate": "1981-09-08",
+    "sal": 1500,
+    "comm": 0,
+    "deptno": 30
+  },
+  {
+    "empno": 7876,
+    "ename": "adams",
+    "job": "clerk",
+    "mgr": 7788,
+    "hiredate": "1987-05-23",
+    "sal": 1100,
+    "comm": null,
+    "deptno": 20
+  },
+  {
+    "empno": 7900,
+    "ename": "james",
+    "job": "clerk",
+    "mgr": 7698,
+    "hiredate": "1981-12-03",
+    "sal": 950,
+    "comm": null,
+    "deptno": 30
+  },
+  {
+    "empno": 7902,
+    "ename": "ford",
+    "job": "analyst",
+    "mgr": 7566,
+    "hiredate": "1981-12-03",
+    "sal": 3000,
+    "comm": null,
+    "deptno": 20
+  },
+  {
+    "empno": 7934,
+    "ename": "miller",
+    "job": "clerk",
+    "mgr": 7782,
+    "hiredate": "1982-01-23",
+    "sal": 1300,
+    "comm": null,
+    "deptno": 10
+  }
+]);
+==========================================================
+1) WAQTD names starting with 's'
+Query:
+db.emp.find({ ename: /^s/i }) ;
+==============================================================
+
+Expected Matches (empno - ename - job):
+7369	smith	clerk
+7788	scott	analyst
+
+2) WAQTD names starting with 'a'
+Query:
+db.emp.find({ ename: /^a/i });
+==============================================================
+
+Expected Matches (empno - ename - job):
+7499	allen	salesman
+7876	adams	clerk
+
+3) WAQTD names starting with a vowel
+Query:
+db.emp.find({ ename: /^[aeiou]/i });
+==============================================================
+
+Expected Matches (empno - ename - job):
+7499	allen	salesman
+7876	adams	clerk
+
+4) WAQTD names starting with 'sm'
+Query:
+db.emp.find({ ename: /^sm/i });
+==============================================================
+
+Expected Matches (empno - ename - job):
+7369	smith	clerk
+
+5) WAQTD names starting with any uppercase letter
+Query:
+db.emp.find({ ename: /^[A-Z]/ });
+==============================================================
+
+Expected Matches (empno - ename - job):
+<no matches>
+
+6) WAQTD names starting with a digit (ename)
+Query:
+db.emp.find({ ename: /^\d/ });
+==============================================================
+
+Expected Matches (empno - ename - job):
+<no matches>
+
+7) WAQTD names starting with 'ma'
+Query:
+db.emp.find({ ename: /^ma/i });
+==============================================================
+
+Expected Matches (empno - ename - job):
+7654	martin	salesman
+
+8) WAQTD names starting with 'c' or 'k'
+Query:
+db.emp.find({ ename: /^[ck]/i });
+==============================================================
+
+Expected Matches (empno - ename - job):
+7782	clark	manager
+7839	king	president
+
+9) WAQTD names NOT starting with 's'
+Query:
+db.emp.find({ ename: /^[^s]/i });
+==============================================================
+
+Expected Matches (empno - ename - job):
+7499	allen	salesman
+7521	ward	salesman
+7566	jones	manager
+7654	martin	salesman
+7698	blake	manager
+7782	clark	manager
+7839	king	president
+7844	turner	salesman
+7876	adams	clerk
+7900	james	clerk
+7902	ford	analyst
+7934	miller	clerk
+
+10) WAQTD names starting with 'bl'
+Query:
+db.emp.find({ ename: /^bl/i });
+==============================================================
+
+Expected Matches (empno - ename - job):
+7698	blake	manager
+
+11) WAQTD names starting with 'm' and at least 5 letters
+Query:
+db.emp.find({ ename: /^m.{4,}/i });
+==============================================================
+
+Expected Matches (empno - ename - job):
+7654	martin	salesman
+7934	miller	clerk
+
+12) WAQTD names starting with a consonant
+Query:
+db.emp.find({ ename: /^[^aeiou]/i });
+==============================================================
+
+Expected Matches (empno - ename - job):
+7369	smith	clerk
+7521	ward	salesman
+7566	jones	manager
+7654	martin	salesman
+7698	blake	manager
+7782	clark	manager
+7788	scott	analyst
+7839	king	president
+7844	turner	salesman
+7900	james	clerk
+7902	ford	analyst
+7934	miller	clerk
+
+13) WAQTD names starting with 'j' and ending with 's'
+Query:
+db.emp.find({ ename: /^j.*s$/i });
+==============================================================
+
+Expected Matches (empno - ename - job):
+7566	jones	manager
+7900	james	clerk
+
+14) WAQTD names starting with 'sc'
+Query:
+db.emp.find({ ename: /^sc/i });
+==============================================================
+
+Expected Matches (empno - ename - job):
+7788	scott	analyst
+
+15) WAQTD names starting with 'ki'
+Query:
+db.emp.find({ ename: /^ki/i });
+==============================================================
+
+Expected Matches (empno - ename - job):
+7839	king	president
+
+16) WAQTD names ending with 'h'
+Query:
+db.emp.find({ ename: /h$/i });
+==============================================================
+
+Expected Matches (empno - ename - job):
+7369	smith	clerk
+
+17) WAQTD names ending with 'n'
+Query:
+db.emp.find({ ename: /n$/i });
+==============================================================
+
+Expected Matches (empno - ename - job):
+7499	allen	salesman
+7654	martin	salesman
+
+18) WAQTD names ending with a vowel
+Query:
+db.emp.find({ ename: /[aeiou]$/i });
+==============================================================
+
+Expected Matches (empno - ename - job):
+7698	blake	manager
+
+19) WAQTD names ending with 'er'
+Query:
+db.emp.find({ ename: /er$/i });
+==============================================================
+
+Expected Matches (empno - ename - job):
+7844	turner	salesman
+7934	miller	clerk
+
+20) WAQTD names ending with 'th'
+Query:
+db.emp.find({ ename: /th$/i });
+==============================================================
+
+Expected Matches (empno - ename - job):
+7369	smith	clerk
+
+21) WAQTD names ending with a digit
+Query:
+db.emp.find({ ename: /\d$/ });
+==============================================================
+
+Expected Matches (empno - ename - job):
+<no matches>
+
+22) WAQTD names ending with 'rt'
+Query:
+db.emp.find({ ename: /rt$/i });
+==============================================================
+
+Expected Matches (empno - ename - job):
+<no matches>
+
+23) WAQTD names ending with 'er' or 'ar'
+Query:
+db.emp.find({ ename: /(er|ar)$/i });
+==============================================================
+
+Expected Matches (empno - ename - job):
+7844	turner	salesman
+7934	miller	clerk
+
+24) WAQTD names ending with any 3 letters
+Query:
+db.emp.find({ ename: /[A-Za-z]{3}$/ });
+==============================================================
+
+Expected Matches (empno - ename - job):
+7369	smith	clerk
+7499	allen	salesman
+7521	ward	salesman
+7566	jones	manager
+7654	martin	salesman
+7698	blake	manager
+7782	clark	manager
+7788	scott	analyst
+7839	king	president
+7844	turner	salesman
+7876	adams	clerk
+7900	james	clerk
+7902	ford	analyst
+7934	miller	clerk
+
+25) WAQTD names ending with 'ing'
+Query:
+db.emp.find({ ename: /ing$/i });
+==============================================================
+
+Expected Matches (empno - ename - job):
+7839	king	president
+
+26) WAQTD names containing 'ar'
+Query:
+db.emp.find({ ename: /ar/i });
+==============================================================
+
+Expected Matches (empno - ename - job):
+7521	ward	salesman
+7654	martin	salesman
+7782	clark	manager
+
+27) WAQTD names containing 'an'
+Query:
+db.emp.find({ ename: /an/i });
+==============================================================
+
+Expected Matches (empno - ename - job):
+<no matches>
+
+28) WAQTD names containing any digit
+Query:
+db.emp.find({ ename: /\d/ });
+==============================================================
+
+Expected Matches (empno - ename - job):
+<no matches>
+
+29) WAQTD names containing double letters
+Query:
+db.emp.find({ ename: /(.)\1/ });
+==============================================================
+
+Expected Matches (empno - ename - job):
+7499	allen	salesman
+7788	scott	analyst
+7934	miller	clerk
+
+30) WAQTD names containing 'in'
+Query:
+db.emp.find({ ename: /in/i });
+==============================================================
+
+Expected Matches (empno - ename - job):
+7654	martin	salesman
+7839	king	president
+
+31) WAQTD names containing 'mi'
+Query:
+db.emp.find({ ename: /mi/i });
+==============================================================
+
+Expected Matches (empno - ename - job):
+7369	smith	clerk
+7934	miller	clerk
+
+32) WAQTD names containing a vowel
+Query:
+db.emp.find({ ename: /[aeiou]/i });
+==============================================================
+
+Expected Matches (empno - ename - job):
+7369	smith	clerk
+7499	allen	salesman
+7521	ward	salesman
+7566	jones	manager
+7654	martin	salesman
+7698	blake	manager
+7782	clark	manager
+7788	scott	analyst
+7839	king	president
+7844	turner	salesman
+7876	adams	clerk
+7900	james	clerk
+7902	ford	analyst
+7934	miller	clerk
+
+33) WAQTD names containing two consecutive vowels
+Query:
+db.emp.find({ ename: /[aeiou]{2}/i });
+==============================================================
+
+Expected Matches (empno - ename - job):
+<no matches>
+
+34) WAQTD names containing two consecutive consonants
+Query:
+db.emp.find({ ename: /[bcdfghjklmnpqrstvwxyz]{2}/i });
+==============================================================
+
+Expected Matches (empno - ename - job):
+7369	smith	clerk
+7499	allen	salesman
+7521	ward	salesman
+7654	martin	salesman
+7698	blake	manager
+7782	clark	manager
+7788	scott	analyst
+7839	king	president
+7844	turner	salesman
+7876	adams	clerk
+7902	ford	analyst
+7934	miller	clerk
+
+35) WAQTD names containing repeated character
+Query:
+db.emp.find({ ename: /(.)\1/ });
+==============================================================
+
+Expected Matches (empno - ename - job):
+7499	allen	salesman
+7788	scott	analyst
+7934	miller	clerk
+
+36) WAQTD names containing space
+Query:
+db.emp.find({ ename: / / });
+==============================================================
+
+Expected Matches (empno - ename - job):
+<no matches>
+
+37) WAQTD names containing hyphen
+Query:
+db.emp.find({ ename: /-/ });
+==============================================================
+
+Expected Matches (empno - ename - job):
+<no matches>
+
+38) WAQTD names containing underscore
+Query:
+db.emp.find({ ename: /_/ });
+==============================================================
+
+Expected Matches (empno - ename - job):
+<no matches>
+
+39) WAQTD names containing only alphabets
+Query:
+db.emp.find({ ename: /^[A-Za-z]+$/ });
+==============================================================
+
+Expected Matches (empno - ename - job):
+7369	smith	clerk
+7499	allen	salesman
+7521	ward	salesman
+7566	jones	manager
+7654	martin	salesman
+7698	blake	manager
+7782	clark	manager
+7788	scott	analyst
+7839	king	president
+7844	turner	salesman
+7876	adams	clerk
+7900	james	clerk
+7902	ford	analyst
+7934	miller	clerk
+
+40) WAQTD names containing alphanumeric only
+Query:
+db.emp.find({ ename: /^[A-Za-z0-9]+$/ })
+
+Expected Matches (empno - ename - job):
+7369	smith	clerk
+7499	allen	salesman
+7521	ward	salesman
+7566	jones	manager
+7654	martin	salesman
+7698	blake	manager
+7782	clark	manager
+7788	scott	analyst
+7839	king	president
+7844	turner	salesman
+7876	adams	clerk
+7900	james	clerk
+7902	ford	analyst
+7934	miller	clerk
+
+41) WAQTD names with exactly 5 letters
+Query:
+db.emp.find({ ename: /^.{5}$/ })
+
+Expected Matches (empno - ename - job):
+7369	smith	clerk
+7499	allen	salesman
+7566	jones	manager
+7698	blake	manager
+7782	clark	manager
+7788	scott	analyst
+7876	adams	clerk
+7900	james	clerk
+
+42) WAQTD names with length 3 to 7
+Query:
+db.emp.find({ ename: /^.{3,7}$/ })
+
+Expected Matches (empno - ename - job):
+7369	smith	clerk
+7499	allen	salesman
+7521	ward	salesman
+7566	jones	manager
+7654	martin	salesman
+7698	blake	manager
+7782	clark	manager
+7788	scott	analyst
+7839	king	president
+7844	turner	salesman
+7876	adams	clerk
+7900	james	clerk
+7902	ford	analyst
+7934	miller	clerk
+
+43) WAQTD names all lowercase
+Query:
+db.emp.find({ ename: /^[a-z]+$/ })
+
+Expected Matches (empno - ename - job):
+7369	smith	clerk
+7499	allen	salesman
+7521	ward	salesman
+7566	jones	manager
+7654	martin	salesman
+7698	blake	manager
+7782	clark	manager
+7788	scott	analyst
+7839	king	president
+7844	turner	salesman
+7876	adams	clerk
+7900	james	clerk
+7902	ford	analyst
+7934	miller	clerk
+
+44) WAQTD names all uppercase
+Query:
+db.emp.find({ ename: /^[A-Z]+$/ })
+
+Expected Matches (empno - ename - job):
+<no matches>
+
+45) WAQTD names first letter uppercase and rest lowercase
+Query:
+db.emp.find({ ename: /^[A-Z][a-z]+$/ })
+
+Expected Matches (empno - ename - job):
+<no matches>
+
+46) WAQTD names beginning with digits
+Query:
+db.emp.find({ ename: /^\d+/ })
+
+Expected Matches (empno - ename - job):
+<no matches>
+
+47) WAQTD names of 2 words separated by a space
+Query:
+db.emp.find({ ename: /^[A-Za-z]+ [A-Za-z]+$/ })
+
+Expected Matches (empno - ename - job):
+<no matches>
+
+48) WAQTD names exactly 'smith' or 'allen'
+Query:
+db.emp.find({ ename: /^(smith|allen)$/i })
+
+Expected Matches (empno - ename - job):
+7369	smith	clerk
+7499	allen	salesman
+
+49) WAQTD names where 2nd character is 'a'
+Query:
+db.emp.find({ ename: /^.a/i })
+
+Expected Matches (empno - ename - job):
+7521	ward	salesman
+7654	martin	salesman
+7900	james	clerk
+
+50) WAQTD names with alternating characters (advanced)
+Query:
+db.emp.find({ ename: /^(.)(.).*\1\2/i })
+
+Expected Matches (empno - ename - job):
+<no matches>
+
+51) WAQTD names starting with any 2 vowels
+Query:
+db.emp.find({ ename: /^[aeiou]{2}/i })
+
+Expected Matches (empno - ename - job):
+<no matches>
+
+52) WAQTD names ending with any 2 consonants
+Query:
+db.emp.find({ ename: /[bcdfghjklmnpqrstvwxyz]{2}$/i })
+
+Expected Matches (empno - ename - job):
+7369	smith	clerk
+7521	ward	salesman
+7782	clark	manager
+7788	scott	analyst
+7839	king	president
+7876	adams	clerk
+7902	ford	analyst
+
+53) WAQTD names containing 'tt'
+Query:
+db.emp.find({ ename: /tt/i })
+
+Expected Matches (empno - ename - job):
+7788	scott	analyst
+
+54) WAQTD names starting with M-Z
+Query:
+db.emp.find({ ename: /^[M-Z]/ })
+
+Expected Matches (empno - ename - job):
+<no matches>
+
+55) WAQTD names ending with A-F
+Query:
+db.emp.find({ ename: /[A-F]$/ })
+
+Expected Matches (empno - ename - job):
+<no matches>
+
+56) WAQTD names containing special character
+Query:
+db.emp.find({ ename: /[^A-Za-z0-9]/ });
+==============================================================
+
+Expected Matches (empno - ename - job):
+<no matches>
+
+57) WAQTD names containing only vowels
+Query:
+db.emp.find({ ename: /^[aeiou]+$/i });
+==============================================================
+
+Expected Matches (empno - ename - job):
+<no matches>
+
+58) WAQTD names starting AND ending with same letter
+Query:
+db.emp.find({ ename: /^(.).*$/i });
+==============================================================
+
+Expected Matches (empno - ename - job):
+<no matches>
+
+59) WAQTD names containing two repeating sets (like abab)
+Query:
+db.emp.find({ ename: /(..)\1/ });
+==============================================================
+
+Expected Matches (empno - ename - job):
+<no matches>
+
+60) WAQTD names ending with two digits
+Query:
+db.emp.find({ ename: /\d{2}$/ });
+==============================================================
+
+Expected Matches (empno - ename - job):
+<no matches>
+
+61) WAQTD names where 3rd character is 'r'
+Query:
+db.emp.find({ ename: /^..r/i });
+==============================================================
+
+Expected Matches (empno - ename - job):
+7521	ward	salesman
+7654	martin	salesman
+7844	turner	salesman
+7902	ford	analyst
+
+62) WAQTD names where 4th character is vowel
+Query:
+db.emp.find({ ename: /^...([aeiou])/i });
+==============================================================
+
+Expected Matches (empno - ename - job):
+7499	allen	salesman
+7566	jones	manager
+7900	james	clerk
+
+63) WAQTD names where second last letter is 'n'
+Query:
+db.emp.find({ ename: /n.$/i });
+==============================================================
+
+Expected Matches (empno - ename - job):
+7839	king	president
+
+64) WAQTD names where first and third letters are same
+Query:
+db.emp.find({ ename: /^(.).\1/i });
+==============================================================
+
+Expected Matches (empno - ename - job):
+7876	adams	clerk
+
+65) WAQTD names where 2nd and last letters are same
+Query:
+db.emp.find({ ename: /^.(.).*\1$/i });
+==============================================================
+
+Expected Matches (empno - ename - job):
+<no matches>
+
+66) WAQTD names where length ≥6 and 4th letter consonant
+Query:
+db.emp.find({ ename: /^.{3}[bcdfghjklmnpqrstvwxyz]/i });
+==============================================================
+
+Expected Matches (empno - ename - job):
+7369	smith	clerk
+7521	ward	salesman
+7654	martin	salesman
+7698	blake	manager
+7782	clark	manager
+7788	scott	analyst
+7839	king	president
+7844	turner	salesman
+7876	adams	clerk
+7902	ford	analyst
+7934	miller	clerk
+
+67) WAQTD names where 1st letter vowel & last vowel
+Query:
+db.emp.find({ ename: /^[aeiou].*[aeiou]$/i });
+==============================================================
+
+Expected Matches (empno - ename - job):
+<no matches>
+
+68) WAQTD names where 1st 3 chars are digits
+Query:
+db.emp.find({ ename: /^\d{3}/ });
+==============================================================
+
+Expected Matches (empno - ename - job):
+<no matches>
+
+69) WAQTD names where 1st 5 chars are alphabets only
+Query:
+db.emp.find({ ename: /^[A-Za-z]{5}/ });
+==============================================================
+
+Expected Matches (empno - ename - job):
+7369	smith	clerk
+7499	allen	salesman
+7566	jones	manager
+7654	martin	salesman
+7698	blake	manager
+7782	clark	manager
+7788	scott	analyst
+7844	turner	salesman
+7876	adams	clerk
+7900	james	clerk
+7934	miller	clerk
+
+70) WAQTD names where 2nd & 3rd chars are digits
+Query:
+db.emp.find({ ename: /^.\d\d/ });
+==============================================================
+
+Expected Matches (empno - ename - job):
+<no matches>
+
+71) WAQTD names containing consonant-vowel-consonant (CVC)
+Query:
+db.emp.find({ ename: /[bcdfghjklmnpqrstvwxyz][aeiou][bcdfghjklmnpqrstvwxyz]/i });
+==============================================================
+
+Expected Matches (empno - ename - job):
+7369	smith	clerk
+7499	allen	salesman
+7521	ward	salesman
+7566	jones	manager
+7654	martin	salesman
+7698	blake	manager
+7782	clark	manager
+7788	scott	analyst
+7839	king	president
+7844	turner	salesman
+7876	adams	clerk
+7900	james	clerk
+7902	ford	analyst
+7934	miller	clerk
+
+72) WAQTD names containing at least 3 vowels
+Query:
+db.emp.find({ ename: /.*[aeiou].*[aeiou].*[aeiou].*/i });
+==============================================================
+
+Expected Matches (empno - ename - job):
+<no matches>
+
+73) WAQTD names containing at least 4 consonants
+Query:
+db.emp.find({ ename: /.*[bcdfghjklmnpqrstvwxyz].*[bcdfghjklmnpqrstvwxyz].*[bcdfghjklmnpqrstvwxyz].*[bcdfghjklmnpqrstvwxyz].*/i });
+==============================================================
+Expected Matches (empno - ename - job):
+7369	smith	clerk
+7654	martin	salesman
+7782	clark	manager
+7788	scott	analyst
+7844	turner	salesman
+7934	miller	clerk
+
+74) WAQTD names containing vowel repeated twice (aa, ee, ...)
+Query:
+db.emp.find({ ename: /(aa|ee|ii|oo|uu)/i });
+==============================================================
+
+Expected Matches (empno - ename - job):
+<no matches>
+
+75) WAQTD names containing consonant repeated twice
+Query:
+db.emp.find({ ename: /([bcdfghjklmnpqrstvwxyz])\1/i });
+==============================================================
+
+Expected Matches (empno - ename - job):
+7499	allen	salesman
+7788	scott	analyst
+7934	miller	clerk
+
+76) WAQTD names containing 2 digits anywhere
+Query:
+db.emp.find({ ename: /.*\d.*\d/ });
+==============================================================
+
+Expected Matches (empno - ename - job):
+<no matches>
+
+77) WAQTD names containing whitespace + letter
+Query:
+db.emp.find({ ename: /\s[A-Za-z]/ });
+==============================================================
+
+Expected Matches (empno - ename - job):
+<no matches>
+
+78) WAQTD names containing 'ing' not at end
+Query:
+db.emp.find({ ename: /ing.+/i });
+==============================================================
+
+Expected Matches (empno - ename - job):
+<no matches>
+
+79) WAQTD names containing any 3 vowels together
+Query:
+db.emp.find({ ename: /[aeiou]{3}/i });
+==============================================================
+
+Expected Matches (empno - ename - job):
+<no matches>
+
+80) WAQTD names containing digit-vowel-digit
+Query:
+db.emp.find({ ename: /\d[aeiou]\d/i });
+==============================================================
+
+Expected Matches (empno - ename - job):
+<no matches>
+
+81) WAQTD names with only digits
+Query:
+db.emp.find({ ename: /^\d+$/ });
+==============================================================
+
+Expected Matches (empno - ename - job):
+<no matches>
+
+82) WAQTD names with only consonants
+Query:
+db.emp.find({ ename: /^[bcdfghjklmnpqrstvwxyz]+$/i });
+==============================================================
+
+Expected Matches (empno - ename - job):
+<no matches>
+
+83) WAQTD names alphanumeric + hyphens only
+Query:
+db.emp.find({ ename: /^[A-Za-z0-9-]+$/ });
+==============================================================
+
+Expected Matches (empno - ename - job):
+7369	smith	clerk
+7499	allen	salesman
+7521	ward	salesman
+7566	jones	manager
+7654	martin	salesman
+7698	blake	manager
+7782	clark	manager
+7788	scott	analyst
+7839	king	president
+7844	turner	salesman
+7876	adams	clerk
+7900	james	clerk
+7902	ford	analyst
+7934	miller	clerk
+
+84) WAQTD names alphanumeric + underscores only
+Query:
+db.emp.find({ ename: /^[A-Za-z0-9_]+$/ });
+==============================================================
+
+Expected Matches (empno - ename - job):
+7369	smith	clerk
+7499	allen	salesman
+7521	ward	salesman
+7566	jones	manager
+7654	martin	salesman
+7698	blake	manager
+7782	clark	manager
+7788	scott	analyst
+7839	king	president
+7844	turner	salesman
+7876	adams	clerk
+7900	james	clerk
+7902	ford	analyst
+7934	miller	clerk
+
+85) WAQTD hyphenated two-word names
+Query:
+db.emp.find({ ename: /^[A-Za-z]+-[A-Za-z]+$/ });
+==============================================================
+
+Expected Matches (empno - ename - job):
+<no matches>
+
+86) WAQTD names uppercase followed by digits
+Query:
+db.emp.find({ ename: /^[A-Z]+\d+$/ });
+==============================================================
+
+Expected Matches (empno - ename - job):
+<no matches>
+
+87) WAQTD names in PascalCase
+Query:
+db.emp.find({ ename: /^[A-Z][a-z]+([A-Z][a-z]+)*$/ });
+==============================================================
+
+Expected Matches (empno - ename - job):
+<no matches>
+
+88) WAQTD names in camelCase
+Query:
+db.emp.find({ ename: /^[a-z]+([A-Z][a-z]+)*$/ });
+==============================================================
+
+Expected Matches (empno - ename - job):
+7369	smith	clerk
+7499	allen	salesman
+7521	ward	salesman
+7566	jones	manager
+7654	martin	salesman
+7698	blake	manager
+7782	clark	manager
+7788	scott	analyst
+7839	king	president
+7844	turner	salesman
+7876	adams	clerk
+7900	james	clerk
+7902	ford	analyst
+7934	miller	clerk
+
+89) WAQTD names in snake_case
+Query:
+db.emp.find({ ename: /^[a-z]+(_[a-z]+)+$/ });
+==============================================================
+
+Expected Matches (empno - ename - job):
+<no matches>
+
+90) WAQTD names in kebab-case
+Query:
+db.emp.find({ ename: /^[a-z]+(-[a-z]+)+$/ });
+==============================================================
+
+Expected Matches (empno - ename - job):
+<no matches>
+
+91) WAQTD names containing any 4 repeating characters
+Query:
+db.emp.find({ ename: /(.)\1\1\1/ });
+==============================================================
+
+Expected Matches (empno - ename - job):
+<no matches>
+
+92) WAQTD names where every alternate character is vowel (approx)
+Query:
+db.emp.find({ ename: /^(.)(.)\1\2/i });
+==============================================================
+
+Expected Matches (empno - ename - job):
+<no matches>
+
+93) WAQTD names matching date-like pattern dd-mm-yyyy
+Query:
+db.emp.find({ ename: /^\d{2}-\d{2}-\d{4}$/ });
+==============================================================
+
+Expected Matches (empno - ename - job):
+<no matches>
+
+94) WAQTD names containing email-like pattern
+Query:
+db.emp.find({ ename: /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/ });
+==============================================================
+
+Expected Matches (empno - ename - job):
+<no matches>
+
+95) WAQTD names that are valid password-like string (look)
+Query:
+db.emp.find({ ename: /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d).{8,}$/ });
+==============================================================
+
+Expected Matches (empno - ename - job):
+<no matches>
+
+96) WAQTD names containing brackets like abc(123)
+Query:
+db.emp.find({ ename: /\(.+\)/ });
+==============================================================
+
+Expected Matches (empno - ename - job):
+<no matches>
+
+97) WAQTD names containing HTML-like tag
+Query:
+db.emp.find({ ename: /<[^>]+>/ });
+==============================================================
+
+Expected Matches (empno - ename - job):
+<no matches>
+
+98) WAQTD names containing currency symbol ₹ or $ followed by digits
+Query:
+db.emp.find({ ename: /(\₹|\$)\d+/ });
+==============================================================
+
+Expected Matches (empno - ename - job):
+<no matches>
+
+99) WAQTD names containing IPv4 format
+Query:
+db.emp.find({ ename: /^(\d{1,3}\.){3}\d{1,3}$/ });
+===============================================================
+Expected Matches (empno - ename - job):
+<no matches>
+
+100) WAQTD names containing time format like 12:30
+Query:
+db.emp.find({ ename: /^\d{2}:\d{2}$/ });
+===============================================================
+Expected Matches (empno - ename - job):
+<no matches>
+
