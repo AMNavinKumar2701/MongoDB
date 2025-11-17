@@ -1,0 +1,416 @@
+==================================================================================================
+MongoDB Comparison Operators :--------
+==================================================================================================
+Comparison operators are part of the query document and are used to filter documents based on field values.
+
+MongoDB Comparison Operators:
+1. $eq → equal
+2. $ne → not equal
+3. $gt → greater than
+4. $gte → greater than or equal
+5. $lt → less than
+6. $lte → less than or equal
+7. $in → matches any value in a list
+8. $nin → NOT in a list
+
+----------------------------------------------
+
+BEFORE STARTING — QUERY COMMUNICATION FLOW INSIDE MONGODB
+
+When you run:
+db.emp.find({ sal: { $gt: 2000 } })
+
+Flow:
+1. Query Parser – validates syntax and builds internal structure
+2. Query Planner – chooses best plan, uses indexes if possible
+3. Query Executor – scans, filters, returns cursor
+4. Cursor Output – results streamed to client
+
+----------------------------------------------
+
+1. $eq — Equal To
+
+Theory:
+$eq matches documents where the field value equals the given value exactly.
+
+Behavior:
+- Type sensitive
+- Uses index if available
+- Missing field does not match
+
+Examples:
+Example 1:
+db.emp.find({ empno: { $eq: 7839 } })
+
+Example 2:
+db.emp.find({ job: { $eq: "manager" } })
+
+Example 3:
+db.emp.find({ comm: { $eq: null } })
+
+----------------------------------------------
+
+2. $ne — Not Equal To
+
+Theory:
+Matches documents where field value is not equal to given value.
+
+Behavior:
+- Matches missing fields also
+- Less index efficient
+
+Examples:
+db.emp.find({ deptno: { $ne: 30 } })
+db.emp.find({ job: { $ne: "manager" } })
+db.emp.find({ comm: { $ne: 0 } })
+
+----------------------------------------------
+
+3. $gt — Greater Than
+
+Theory:
+Matches values greater than given value.
+
+Behavior:
+- Numeric & date comparison
+- Uses index range scan
+
+Examples:
+db.emp.find({ sal: { $gt: 3000 } })
+db.emp.find({ hiredate: { $gt: new Date("1981-01-01") } })
+db.emp.find({ deptno: { $gt: 20 } })
+
+----------------------------------------------
+
+4. $gte — Greater Than or Equal To
+
+Theory:
+Matches values >= given value.
+
+Examples:
+db.emp.find({ sal: { $gte: 3000 } })
+db.emp.find({ deptno: { $gte: 30 } })
+db.emp.find({ hiredate: { $gte: new Date("1981-09-01") } })
+
+----------------------------------------------
+
+5. $lt — Less Than
+
+Theory:
+Matches values < given value.
+
+Examples:
+db.emp.find({ sal: { $lt: 1000 } })
+db.emp.find({ deptno: { $lt: 20 } })
+db.emp.find({ hiredate: { $lt: new Date("1981-05-01") } })
+
+----------------------------------------------
+
+6. $lte — Less Than or Equal To
+
+Theory:
+Matches values <= given value.
+
+Examples:
+db.emp.find({ sal: { $lte: 1500 } })
+db.emp.find({ deptno: { $lte: 30 } })
+db.emp.find({ hiredate: { $lte: new Date("1981-02-22") } })
+
+----------------------------------------------
+
+7. $in — Matches ANY from a set
+
+Theory:
+Equivalent to SQL IN.
+
+Behavior:
+- Fast with index
+- Matches if field equals any element in array
+
+Examples:
+db.emp.find({ deptno: { $in: [10,20] } })
+db.emp.find({ job: { $in: ["manager","analyst"] } })
+db.emp.find({ empno: { $in: [7369, 7902, 7839] } })
+
+----------------------------------------------
+
+8. $nin — NOT IN
+
+Theory:
+Opposite of $in.
+
+Behavior:
+- Matches values NOT in list
+- Matches if field missing
+
+Examples:
+db.emp.find({ deptno: { $nin: [10,20] } })
+db.emp.find({ job: { $nin: ["salesman","manager"] } })
+db.emp.find({ sal: { $nin: [800,1250] } })
+
+----------------------------------------------
+
+=== $eq OPERATOR ===
+
+Q1. WAQTD EMPLOYEES IN DEPARTMENT EQUAL TO 10
+A1. db.emp.find({ deptno: { $eq: 10 } });
+
+Q2. WAQTD EMPLOYEES WHOSE JOB IS EQUAL TO 'CLERK'
+A2. db.emp.find({ job: { $eq: "clerk" } });
+
+Q3. WAQTD EMPLOYEE WHOSE EMPNO IS EQUAL TO 7839
+A3. db.emp.find({ empno: { $eq: 7839 } });
+
+Q4. WAQTD EMPLOYEES WHOSE COMMISSION IS EQUAL TO NULL
+A4. db.emp.find({ comm: { $eq: null } });
+
+Q5. WAQTD EMPLOYEES HIRED ON THE DATE EQUAL TO '1981-09-28'
+A5. db.emp.find({ hiredate: { $eq: new Date("1981-09-28") } });
+
+Q6. WAQTD EMPLOYEES WHOSE SALARY IS EQUAL TO 1600
+A6. db.emp.find({ sal: { $eq: 1600 } });
+
+Q7. WAQTD EMPLOYEES WHOSE NAME IS EQUAL TO 'SCOTT'
+A7. db.emp.find({ ename: { $eq: "scott" } });
+
+Q8. WAQTD EMPLOYEES WHOSE COMMISSION IS EQUAL TO 0
+A8. db.emp.find({ comm: { $eq: 0 } });
+
+Q9. WAQTD DEPARTMENTS WHOSE LOCATION IS EQUAL TO 'CHICAGO'
+A9. db.dept.find({ loc: { $eq: "chicago" } });
+
+Q10. WAQTD DEPARTMENTS WHOSE NAME IS EQUAL TO 'SALES'
+A10. db.dept.find({ dname: { $eq: "sales" } });
+
+
+=== $ne OPERATOR ===
+
+Q11. WAQTD EMPLOYEES NOT IN DEPARTMENT 30
+A11. db.emp.find({ deptno: { $ne: 30 } });
+
+Q12. WAQTD EMPLOYEES WHO ARE NOT MANAGERS
+A12. db.emp.find({ job: { $ne: "manager" } });
+
+Q13. WAQTD EMPLOYEES WHOSE COMMISSION IS NOT NULL
+A13. db.emp.find({ comm: { $ne: null } });
+
+Q14. WAQTD EMPLOYEES WHOSE SALARY IS NOT 3000
+A14. db.emp.find({ sal: { $ne: 3000 } });
+
+Q15. WAQTD EMPLOYEES NOT HIRED ON THE DATE '1981-02-20'
+A15. db.emp.find({ hiredate: { $ne: new Date("1981-02-20") } });
+
+Q16. WAQTD EMPLOYEES WHOSE EMPNO IS NOT 7369
+A16. db.emp.find({ empno: { $ne: 7369 } });
+
+Q17. WAQTD EMPLOYEES NOT IN DEPARTMENT 10
+A17. db.emp.find({ deptno: { $ne: 10 } });
+
+Q18. WAQTD EMPLOYEES WHOSE JOB IS NOT 'CLERK'
+A18. db.emp.find({ job: { $ne: "clerk" } });
+
+Q19. WAQTD DEPARTMENTS NOT IN LOCATION 'NEW YORK'
+A19. db.dept.find({ loc: { $ne: "new york" } });
+
+Q20. WAQTD EMPLOYEES WHOSE COMMISSION IS NOT 0
+A20. db.emp.find({ comm: { $ne: 0 } });
+
+
+=== $gt OPERATOR ===
+
+Q21. WAQTD EMPLOYEES WITH SALARY GREATER THAN 3000
+A21. db.emp.find({ sal: { $gt: 3000 } });
+
+Q22. WAQTD EMPLOYEES IN DEPARTMENT NUMBER GREATER THAN 20
+A22. db.emp.find({ deptno: { $gt: 20 } });
+
+Q23. WAQTD EMPLOYEES HIRED AFTER THE DATE '1985-01-01'
+A23. db.emp.find({ hiredate: { $gt: new Date("1985-01-01") } });
+
+Q24. WAQTD EMPLOYEES WHOSE EMPNO IS GREATER THAN 7600
+A24. db.emp.find({ empno: { $gt: 7600 } });
+
+Q25. WAQTD EMPLOYEES WHOSE COMMISSION IS GREATER THAN 300
+A25. db.emp.find({ comm: { $gt: 300 } });
+
+Q26. WAQTD EMPLOYEES WHOSE SALARY IS GREATER THAN 2000
+A26. db.emp.find({ sal: { $gt: 2000 } });
+
+Q27. WAQTD EMPLOYEES WHOSE MANAGER NUMBER IS GREATER THAN 7700
+A27. db.emp.find({ mgr: { $gt: 7700 } });
+
+Q28. WAQTD DEPARTMENTS WHOSE DEPTNO IS GREATER THAN 20
+A28. db.dept.find({ deptno: { $gt: 20 } });
+
+Q29. WAQTD EMPLOYEES WHOSE SALARY IS GREATER THAN COMMISSION
+A29. db.emp.find({ $expr: { $gt: ["$sal", "$comm"] } });
+
+Q30. WAQTD EMPLOYEES WHOSE SALARY IS GREATER THAN 1000
+A30. db.emp.find({ sal: { $gt: 1000 } });
+
+
+=== $gte OPERATOR ===
+
+Q31. WAQTD EMPLOYEES WITH SALARY GREATER THAN OR EQUAL TO 3000
+A31. db.emp.find({ sal: { $gte: 3000 } });
+
+Q32. WAQTD EMPLOYEES IN DEPARTMENT NUMBER GREATER THAN OR EQUAL TO 20
+A32. db.emp.find({ deptno: { $gte: 20 } });
+
+Q33. WAQTD EMPLOYEES HIRED ON OR AFTER THE DATE '1981-09-01'
+A33. db.emp.find({ hiredate: { $gte: new Date("1981-09-01") } });
+
+Q34. WAQTD EMPLOYEES WHOSE EMPNO IS GREATER THAN OR EQUAL TO 7800
+A34. db.emp.find({ empno: { $gte: 7800 } });
+
+Q35. WAQTD EMPLOYEES WHOSE COMMISSION IS GREATER THAN OR EQUAL TO 500
+A35. db.emp.find({ comm: { $gte: 500 } });
+
+Q36. WAQTD EMPLOYEES WHOSE SALARY IS GREATER THAN OR EQUAL TO 1500
+A36. db.emp.find({ sal: { $gte: 1500 } });
+
+Q37. WAQTD EMPLOYEES WHOSE MANAGER NUMBER IS GREATER THAN OR EQUAL TO 7698
+A37. db.emp.find({ mgr: { $gte: 7698 } });
+
+Q38. WAQTD DEPARTMENTS WHOSE DEPTNO IS GREATER THAN OR EQUAL TO 30
+A38. db.dept.find({ deptno: { $gte: 30 } });
+
+Q39. WAQTD EMPLOYEES WHOSE SALARY IS GREATER THAN OR EQUAL TO COMMISSION
+A39. db.emp.find({ $expr: { $gte: ["$sal", "$comm"] } });
+
+Q40. WAQTD EMPLOYEES WHOSE SALARY IS GREATER THAN OR EQUAL TO 1100
+A40. db.emp.find({ sal: { $gte: 1100 } });
+
+
+=== $lt OPERATOR ===
+
+Q41. WAQTD EMPLOYEES WITH SALARY LESS THAN 1000
+A41. db.emp.find({ sal: { $lt: 1000 } });
+
+Q42. WAQTD EMPLOYEES IN DEPARTMENT NUMBER LESS THAN 20
+A42. db.emp.find({ deptno: { $lt: 20 } });
+
+Q43. WAQTD EMPLOYEES HIRED BEFORE THE DATE '1981-05-01'
+A43. db.emp.find({ hiredate: { $lt: new Date("1981-05-01") } });
+
+Q44. WAQTD EMPLOYEES WHOSE EMPNO IS LESS THAN 7500
+A44. db.emp.find({ empno: { $lt: 7500 } });
+
+Q45. WAQTD EMPLOYEES WHOSE COMMISSION IS LESS THAN 500
+A45. db.emp.find({ comm: { $lt: 500 } });
+
+Q46. WAQTD EMPLOYEES WHOSE SALARY IS LESS THAN 1500
+A46. db.emp.find({ sal: { $lt: 1500 } });
+
+Q47. WAQTD EMPLOYEES WHOSE MANAGER NUMBER IS LESS THAN 7600
+A47. db.emp.find({ mgr: { $lt: 7600 } });
+
+Q48. WAQTD DEPARTMENTS WHOSE DEPTNO IS LESS THAN 20
+A48. db.dept.find({ deptno: { $lt: 20 } });
+
+Q49. WAQTD EMPLOYEES WHOSE SALARY IS LESS THAN COMMISSION
+A49. db.emp.find({ $expr: { $lt: ["$sal", "$comm"] } });
+
+Q50. WAQTD EMPLOYEES WHOSE SALARY IS LESS THAN 900
+A50. db.emp.find({ sal: { $lt: 900 } });
+
+
+=== $lte OPERATOR ===
+
+Q51. WAQTD EMPLOYEES WITH SALARY LESS THAN OR EQUAL TO 1500
+A51. db.emp.find({ sal: { $lte: 1500 } });
+
+Q52. WAQTD EMPLOYEES IN DEPARTMENT NUMBER LESS THAN OR EQUAL TO 20
+A52. db.emp.find({ deptno: { $lte: 20 } });
+
+Q53. WAQTD EMPLOYEES HIRED ON OR BEFORE THE DATE '1981-02-22'
+A53. db.emp.find({ hiredate: { $lte: new Date("1981-02-22") } });
+
+Q54. WAQTD EMPLOYEES WHOSE EMPNO IS LESS THAN OR EQUAL TO 7600
+A54. db.emp.find({ empno: { $lte: 7600 } });
+
+Q55. WAQTD EMPLOYEES WHOSE COMMISSION IS LESS THAN OR EQUAL TO 500
+A55. db.emp.find({ comm: { $lte: 500 } });
+
+Q56. WAQTD EMPLOYEES WHOSE SALARY IS LESS THAN OR EQUAL TO 1300
+A56. db.emp.find({ sal: { $lte: 1300 } });
+
+Q57. WAQTD EMPLOYEES WHOSE MANAGER NUMBER IS LESS THAN OR EQUAL TO 7700
+A57. db.emp.find({ mgr: { $lte: 7700 } });
+
+Q58. WAQTD DEPARTMENTS WHOSE DEPTNO IS LESS THAN OR EQUAL TO 30
+A58. db.dept.find({ deptno: { $lte: 30 } });
+
+Q59. WAQTD EMPLOYEES WHOSE SALARY IS LESS THAN OR EQUAL TO COMMISSION
+A59. db.emp.find({ $expr: { $lte: ["$sal", "$comm"] } });
+
+Q60. WAQTD EMPLOYEES WHOSE SALARY IS LESS THAN OR EQUAL TO 1100
+A60. db.emp.find({ sal: { $lte: 1100 } });
+
+
+=== $in OPERATOR ===
+
+Q61. WAQTD EMPLOYEES IN DEPARTMENTS 10 OR 20
+A61. db.emp.find({ deptno: { $in: [10,20] } });
+
+Q62. WAQTD EMPLOYEES WHO ARE MANAGER OR ANALYST
+A62. db.emp.find({ job: { $in: ["manager","analyst"] } });
+
+Q63. WAQTD EMPLOYEES WHOSE EMPNO IS 7369 OR 7499 OR 7934
+A63. db.emp.find({ empno: { $in: [7369,7499,7934] } });
+
+Q64. WAQTD EMPLOYEES WHOSE SALARY IS 800 OR 1600
+A64. db.emp.find({ sal: { $in: [800,1600] } });
+
+Q65. WAQTD EMPLOYEES WHOSE COMMISSION IS 0 OR 300
+A65. db.emp.find({ comm: { $in: [0,300] } });
+
+Q66. WAQTD EMPLOYEES WHOSE JOB IS SALESMAN OR MANAGER
+A66. db.emp.find({ job: { $in: ["salesman","manager"] } });
+
+Q67. WAQTD DEPARTMENTS IN LOCATIONS CHICAGO OR BOSTON
+A67. db.dept.find({ loc: { $in: ["chicago","boston"] } });
+
+Q68. WAQTD EMPLOYEES IN DEPARTMENTS 20 OR 30
+A68. db.emp.find({ deptno: { $in: [20,30] } });
+
+Q69. WAQTD EMPLOYEES WHOSE MANAGER NUMBER IS 7566 OR 7698
+A69. db.emp.find({ mgr: { $in: [7566,7698] } });
+
+Q70. WAQTD EMPLOYEES WHOSE SALARY IS 950 OR 1100
+A70. db.emp.find({ sal: { $in: [950,1100] } });
+
+
+=== $nin OPERATOR ===
+
+Q71. WAQTD EMPLOYEES NOT IN DEPARTMENTS 10 OR 20
+A71. db.emp.find({ deptno: { $nin: [10,20] } });
+
+Q72. WAQTD EMPLOYEES WHO ARE NOT MANAGER OR ANALYST
+A72. db.emp.find({ job: { $nin: ["manager","analyst"] } });
+
+Q73. WAQTD EMPLOYEES WHOSE EMPNO IS NOT 7369 OR 7499
+A73. db.emp.find({ empno: { $nin: [7369,7499] } });
+
+Q74. WAQTD EMPLOYEES WHOSE SALARY IS NOT 800 OR 1600
+A74. db.emp.find({ sal: { $nin: [800,1600] } });
+
+Q75. WAQTD EMPLOYEES WHOSE COMMISSION IS NOT 0 OR 300
+A75. db.emp.find({ comm: { $nin: [0,300] } });
+
+Q76. WAQTD EMPLOYEES WHOSE JOB IS NOT SALESMAN OR MANAGER
+A76. db.emp.find({ job: { $nin: ["salesman","manager"] } });
+
+Q77. WAQTD DEPARTMENTS NOT IN LOCATIONS CHICAGO OR BOSTON
+A77. db.dept.find({ loc: { $nin: ["chicago","boston"] } });
+
+Q78. WAQTD EMPLOYEES NOT IN DEPARTMENTS 20 OR 30
+A78. db.emp.find({ deptno: { $nin: [20,30] } });
+
+Q79. WAQTD EMPLOYEES NOT HAVING MANAGER NUMBERS 7566, 7698, 7839, 7902
+A79. db.emp.find({ mgr: { $nin: [7566,7698,7839,7902] } });
+
+Q80. WAQTD EMPLOYEES WHOSE SALARY IS NOT 900 OR 1100
+A80. db.emp.find({ sal: { $nin: [900,1100] } });
+
+
