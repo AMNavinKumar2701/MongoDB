@@ -1,0 +1,262 @@
+================================================
+          ARRAY QUERY OPERATORS IN MONGODB
+================================================
+Array query operators are used to filter and retrieve documents based on conditions applied to array fields within the documents. 
+------------------------------------------------------------
+SAMPLE COLLECTION (Array of Embedded Documents)
+------------------------------------------------------------
+db.orders.insertMany([
+  {
+    _id: 1,
+    customer: "Amit",
+    items: [
+      { product: "Pen", qty: 10, price: 20 },
+      { product: "Book", qty: 2, price: 200 },
+      { product: "Pencil", qty: 5, price: 10 }
+    ],
+    tags: ["stationery", "school", "low-price"]
+  },
+  {
+    _id: 2,
+    customer: "Ravi",
+    items: [
+      { product: "Pen", qty: 5, price: 20 },
+      { product: "Bag", qty: 1, price: 500 }
+    ],
+    tags: ["office", "travel"]
+  },
+  {
+    _id: 3,
+    customer: "John",
+    items: [
+      { product: "Laptop", qty: 1, price: 55000 },
+      { product: "Mouse", qty: 1, price: 500 },
+      { product: "Keyboard", qty: 1, price: 1500 }
+    ],
+    tags: ["electronics", "office", "premium"]
+  }
+]);
+
+============================================================
+1) $all OPERATOR:---
+============================================================
+Theory:-
+$all checks whether an ARRAY contains ALL specified values.
+Equivalent to AND logic inside array.
+
+Behavior:-
+• MongoDB checks each required value across entire array
+• Order does not matter
+• Values may appear in different positions
+• All must exist → match
+
+Syntax:-
+db.collection.find({ arrayField: { $all: [value1, value2] } })
+
+------------------------------------------------------------
+10 EXAMPLES with QUESTIONS
+------------------------------------------------------------
+
+1) Q: Find orders containing BOTH "stationery" AND "school".
+   A:
+   db.orders.find({ tags: { $all: ["stationery", "school"] } })
+
+2) Q: Find orders containing all three tags: stationery, school, low-price.
+   A:
+   db.orders.find({ tags: { $all: ["stationery", "school", "low-price"] } })
+
+3) Q: Find orders having BOTH office and travel tags.
+   A:
+   db.orders.find({ tags: { $all: ["office", "travel"] } })
+
+4) Q: Find orders with tags electronics AND premium.
+   A:
+   db.orders.find({ tags: { $all: ["electronics", "premium"] } })
+
+5) Q: Match array that contains BOTH 5 and 10 in numeric array.
+   A:
+   db.orders.find({ quantities: { $all: [5, 10] } })
+
+6) Q: Check mixed type array must contain “pen”, 10, and true.
+   A:
+   db.test.find({ arr: { $all: ["pen", 10, true] } })
+
+7) Q: Check items array must contain BOTH Pen and Pencil.
+   A:
+   db.orders.find({ "items.product": { $all: ["Pen", "Pencil"] } })
+
+8) Q: Must contain qty 10 AND qty 5 in items.
+   A:
+   db.orders.find({ "items.qty": { $all: [10, 5] } })
+
+9) Q: Find if tags have BOTH school AND premium (no match expected).
+   A:
+   db.orders.find({ tags: { $all: ["school", "premium"] } })
+
+10) Q: $all with regex search for office and premium tags.
+    A:
+    db.orders.find({ tags: { $all: [/office/, /premium/] } })
+
+
+============================================================
+2) $elemMatch OPERATOR:-
+============================================================
+Theory:-
+$elemMatch ensures MULTIPLE conditions must match inside ONE SINGLE element
+of an array.
+
+Without $elemMatch → MongoDB may apply conditions across different elements.
+
+Behavior:-
+• MongoDB checks each element individually
+• One element must satisfy ALL conditions
+• If conditions split across multiple elements → NOT MATCH
+
+Syntax:-
+db.collection.find({
+  arrayField: { $elemMatch: { cond1, cond2 } }
+})
+
+------------------------------------------------------------
+10 EXAMPLES with QUESTIONS
+------------------------------------------------------------
+
+1) Q: Find orders where ONE item has qty >= 5 AND price <= 20.
+   A:
+   db.orders.find({
+     items: { $elemMatch: { qty: { $gte: 5 }, price: { $lte: 20 } } }
+   })
+
+2) Q: Order containing item Pen with qty >= 10.
+   A:
+   db.orders.find({
+     items: { $elemMatch: { product: "Pen", qty: { $gte: 10 } } }
+   })
+
+3) Q: One item price must be between 1000 and 50000.
+   A:
+   db.orders.find({
+     items: { $elemMatch: { price: { $gte: 1000, $lte: 50000 } } }
+   })
+
+4) Q: One item is Laptop with qty = 1.
+   A:
+   db.orders.find({
+     items: { $elemMatch: { qty: 1, product: "Laptop" } }
+   })
+
+5) Q: Item having price != 20 AND qty > 2 in SAME element.
+   A:
+   db.orders.find({
+     items: { $elemMatch: { price: { $ne: 20 }, qty: { $gt: 2 } } }
+   })
+
+6) Q: OR inside elemMatch (price = 500 OR product = "Mouse").
+   A:
+   db.orders.find({
+     items: {
+       $elemMatch: {
+         $or: [{ price: 500 }, { product: "Mouse" }]
+       }
+     }
+   })
+
+7) Q: Find item where product matches /book/i (case insensitive).
+   A:
+   db.orders.find({
+     items: { $elemMatch: { product: /book/i } }
+   })
+
+8) Q: Match element having BOTH price = 20 AND qty = 10 in SAME doc.
+   A:
+   db.orders.find({
+     items: { $elemMatch: { price: 20, qty: 10 } }
+   })
+
+9) Q: Find orders where one item has qty 1-2 AND price < 2000.
+   A:
+   db.orders.find({
+     items: {
+       $elemMatch: { qty: { $gte: 1, $lte: 2 }, price: { $lt: 2000 } }
+     }
+   })
+
+10) Q: Match item Keyboard with qty=1 and price >=1000.
+    A:
+    db.orders.find({
+      items: {
+        $elemMatch: { product: "Keyboard", qty: 1, price: { $gte: 1000 } }
+      }
+    })
+
+
+============================================================
+3) $size OPERATOR:--
+============================================================
+Theory:-
+$size matches documents where ARRAY LENGTH is EXACT NUMBER.
+Strict match.
+
+Behavior:-
+• MongoDB directly checks array length
+• Cannot use $gt, $lt etc
+• For range → use $expr + $size
+
+Syntax:-
+db.collection.find({ arrayField: { $size: n } })
+
+------------------------------------------------------------
+10 EXAMPLES with QUESTIONS
+------------------------------------------------------------
+
+1) Q: Orders having exactly 3 items.
+   A:
+   db.orders.find({ items: { $size: 3 } })
+
+2) Q: Orders with exactly 2 tags.
+   A:
+   db.orders.find({ tags: { $size: 2 } })
+
+3) Q: Tags length is exactly 1.
+   A:
+   db.orders.find({ tags: { $size: 1 } })
+
+4) Q: Tags are empty array.
+   A:
+   db.orders.find({ tags: { $size: 0 } })
+
+5) Q: items length = 3.
+   A:
+   db.orders.find({ items: { $size: 3 } })
+
+6) Q: ratings length = 3.
+   A:
+   db.orders.find({ ratings: { $size: 3 } })
+
+7) Q: items length = 3 AND customer="Amit".
+   A:
+   db.orders.find({
+     $and: [
+       { items: { $size: 3 } },
+       { customer: "Amit" }
+     ]
+   })
+
+8) Q: Find arrays where items length > 0 (using $expr).
+   A:
+   db.orders.find({
+     $expr: { $gt: [ { $size: "$items" }, 0 ] }
+   })
+
+9) Q: tags length = 3.
+   A:
+   db.orders.find({ tags: { $size: 3 } })
+
+10) Q: Nested array size check.
+    A:
+    db.test.find({ "a.b": { $size: 2 } })
+
+
+============================================================
+
+============================================================
