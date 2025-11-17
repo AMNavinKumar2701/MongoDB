@@ -1,1 +1,3000 @@
+=============================================
+I. LOGICAL OPERATORS
+=============================================
 
+MongoDB logical operators combine multiple conditions to form complex queries.
+
+List of Logical Operators
+1.$and
+2.$or
+3.$nor
+4.$not
+=============================================
+⭐ 1. $and Operator
+=============================================
+Theory:--
+Combines two or more expressions.
+A document is returned only if all conditions are TRUE (Boolean AND).
+
+Behavior:--
+MongoDB must evaluate each condition sequentially.
+If any condition fails → document rejected.
+
+Communication Flow:---
+Query parser reads $and array.
+Each condition is evaluated individually.
+Execution engine selects only documents that satisfy ALL conditions.
+
+✅ Examples using emp collection
+--------------------------------------------
+Example 1: Salary > 2000 AND deptno = 20
+db.emp.find({
+  $and: [
+    { sal: { $gt: 2000 } },
+    { deptno: 20 }
+  ]
+})
+
+Example 2: job = "manager" AND sal < 3000
+db.emp.find({
+  $and: [
+    { job: "manager" },
+    { sal: { $lt: 3000 } }
+  ]
+})
+
+Example 3: deptno = 30 AND commission is not null
+db.emp.find({
+  $and: [
+    { deptno: 30 },
+    { comm: { $ne: null } }
+  ]
+})
+=============================================
+⭐ 2. $or Operator
+=============================================
+Theory:--
+Returns documents that satisfy at least ONE condition.
+
+Behavior:--
+If any expression inside $or evaluates to TRUE → return.
+
+Communication Flow:---
+MongoDB evaluates each clause independently.
+All matched documents from each branch are merged.
+Duplicate removal is done before final output.
+
+✅ Examples:--
+-------------------------------------------------
+Example 1: manager OR clerk
+db.emp.find({
+  $or: [{ job: "manager" }, { job: "clerk" }]
+})
+
+Example 2: sal > 3000 OR deptno = 10
+db.emp.find({
+  $or: [{ sal: { $gt: 3000 } }, { deptno: 10 }]
+})
+
+Example 3: comm = 0 OR salary < 1000
+db.emp.find({
+  $or: [{ comm: 0 }, { sal: { $lt: 1000 } }]
+})
+=============================================
+⭐ 3. $nor Operator
+=============================================
+Theory:--
+Opposite of OR.
+Returns documents that fail ALL listed conditions.
+
+Behavior:--
+ALL conditions must return FALSE.
+Equivalent to: NOT (A OR B)
+
+Communication Flow:--
+Query planner groups conditions.
+If any one is true → reject document.
+Only documents with all conditions false are returned.
+
+✅ Examples:-
+=============================================
+Example 1: job not manager NOR clerk
+db.emp.find({
+  $nor: [
+    { job: "manager" },
+    { job: "clerk" }
+  ]
+})
+
+Example 2: NOT (deptno = 30 OR sal > 2000)
+db.emp.find({
+  $nor: [
+    { deptno: 30 },
+    { sal: { $gt: 2000 } }
+  ]
+})
+
+Example 3: NOT (comm > 0 OR mgr = null)
+db.emp.find({
+  $nor: [
+    { comm: { $gt: 0 } },
+    { mgr: null }
+  ]
+})
+=============================================
+⭐ 4. $not Operator
+=============================================
+Theory:--
+Reverses the result of another operator.
+Works only on single expressions (not whole conditions).
+
+Behavior:--
+If expression is TRUE → makes it FALSE
+If expression is FALSE → makes it TRUE
+
+Communication Flow:--
+$not wraps another operator like $gt, $lt, etc.
+Negates the evaluation result.
+Documents passing negation only are returned.
+
+✅ Examples:-
+---------------------------------------
+Example 1: salary NOT greater than 2000 (means <= 2000)
+db.emp.find({
+  sal: { $not: { $gt: 2000 } }
+})
+
+Example 2: deptno NOT 30
+db.emp.find({
+  deptno: { $not: { $eq: 30 } }
+})
+
+Example 3: name NOT starting with 's'
+db.emp.find({
+  ename: { $not: /^s/i }
+})
+
+=========================================================
+MONGODB LOGICAL OPERATORS – FINAL 80 QnA (DESCRIPTIVE)
+=======================================================
+
+FULL EXPLANATION OF 4 OPERATORS:
+
+$and → All listed conditions must be TRUE.
+$or  → At least one listed condition must be TRUE.
+$nor → All listed conditions must be FALSE.
+$not → Negates the condition applied on a single field.
+
+
+==================== $and (20 QnA) ====================
+
+--------------------------------------------------------------------
+Q1) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> employees earning more than 2000 AND working in deptno 20
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "$and": [
+    {
+      "sal": {
+        "$gt": 2000
+      }
+    },
+    {
+      "deptno": 20
+    }
+  ]
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+jones   manager    2975  20
+scott   analyst    3000  20
+ford    analyst    3000  20
+
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+Q2) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> managers working in department 30
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "$and": [
+    {
+      "job": "manager"
+    },
+    {
+      "deptno": 30
+    }
+  ]
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+blake   manager    2850  30
+
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+Q3) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> clerks earning below 1000
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "$and": [
+    {
+      "job": "clerk"
+    },
+    {
+      "sal": {
+        "$lt": 1000
+      }
+    }
+  ]
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+smith   clerk      800   20
+james   clerk      950   30
+
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+Q4) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> salesmen having commission (simulated) above 0
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "$and": [
+    {
+      "job": "salesman"
+    },
+    {
+      "comm": {
+        "$gt": 0
+      }
+    }
+  ]
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+allen   salesman   1600  30
+ward    salesman   1250  30
+martin  salesman   1250  30
+
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+Q5) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> managers earning above 2500
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "$and": [
+    {
+      "job": "manager"
+    },
+    {
+      "sal": {
+        "$gt": 2500
+      }
+    }
+  ]
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+jones   manager    2975  20
+blake   manager    2850  30
+
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+Q6) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> employees earning more than 2000 AND working in deptno 20
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "$and": [
+    {
+      "sal": {
+        "$gt": 2000
+      }
+    },
+    {
+      "deptno": 20
+    }
+  ]
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+jones   manager    2975  20
+scott   analyst    3000  20
+ford    analyst    3000  20
+
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+Q7) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> managers working in department 30
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "$and": [
+    {
+      "job": "manager"
+    },
+    {
+      "deptno": 30
+    }
+  ]
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+blake   manager    2850  30
+
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+Q8) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> clerks earning below 1000
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "$and": [
+    {
+      "job": "clerk"
+    },
+    {
+      "sal": {
+        "$lt": 1000
+      }
+    }
+  ]
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+smith   clerk      800   20
+james   clerk      950   30
+
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+Q9) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> salesmen having commission (simulated) above 0
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "$and": [
+    {
+      "job": "salesman"
+    },
+    {
+      "comm": {
+        "$gt": 0
+      }
+    }
+  ]
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+allen   salesman   1600  30
+ward    salesman   1250  30
+martin  salesman   1250  30
+
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+Q10) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> managers earning above 2500
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "$and": [
+    {
+      "job": "manager"
+    },
+    {
+      "sal": {
+        "$gt": 2500
+      }
+    }
+  ]
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+jones   manager    2975  20
+blake   manager    2850  30
+
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+Q11) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> employees earning more than 2000 AND working in deptno 20
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "$and": [
+    {
+      "sal": {
+        "$gt": 2000
+      }
+    },
+    {
+      "deptno": 20
+    }
+  ]
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+jones   manager    2975  20
+scott   analyst    3000  20
+ford    analyst    3000  20
+
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+Q12) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> managers working in department 30
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "$and": [
+    {
+      "job": "manager"
+    },
+    {
+      "deptno": 30
+    }
+  ]
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+blake   manager    2850  30
+
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+Q13) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> clerks earning below 1000
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "$and": [
+    {
+      "job": "clerk"
+    },
+    {
+      "sal": {
+        "$lt": 1000
+      }
+    }
+  ]
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+smith   clerk      800   20
+james   clerk      950   30
+
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+Q14) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> salesmen having commission (simulated) above 0
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "$and": [
+    {
+      "job": "salesman"
+    },
+    {
+      "comm": {
+        "$gt": 0
+      }
+    }
+  ]
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+allen   salesman   1600  30
+ward    salesman   1250  30
+martin  salesman   1250  30
+
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+Q15) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> managers earning above 2500
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "$and": [
+    {
+      "job": "manager"
+    },
+    {
+      "sal": {
+        "$gt": 2500
+      }
+    }
+  ]
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+jones   manager    2975  20
+blake   manager    2850  30
+
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+Q16) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> employees earning more than 2000 AND working in deptno 20
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "$and": [
+    {
+      "sal": {
+        "$gt": 2000
+      }
+    },
+    {
+      "deptno": 20
+    }
+  ]
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+jones   manager    2975  20
+scott   analyst    3000  20
+ford    analyst    3000  20
+
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+Q17) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> managers working in department 30
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "$and": [
+    {
+      "job": "manager"
+    },
+    {
+      "deptno": 30
+    }
+  ]
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+blake   manager    2850  30
+
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+Q18) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> clerks earning below 1000
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "$and": [
+    {
+      "job": "clerk"
+    },
+    {
+      "sal": {
+        "$lt": 1000
+      }
+    }
+  ]
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+smith   clerk      800   20
+james   clerk      950   30
+
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+Q19) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> salesmen having commission (simulated) above 0
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "$and": [
+    {
+      "job": "salesman"
+    },
+    {
+      "comm": {
+        "$gt": 0
+      }
+    }
+  ]
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+allen   salesman   1600  30
+ward    salesman   1250  30
+martin  salesman   1250  30
+
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+Q20) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> managers earning above 2500
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "$and": [
+    {
+      "job": "manager"
+    },
+    {
+      "sal": {
+        "$gt": 2500
+      }
+    }
+  ]
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+jones   manager    2975  20
+blake   manager    2850  30
+
+--------------------------------------------------------------------
+
+
+==================== $or (20 QnA) ====================
+
+--------------------------------------------------------------------
+Q1) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> employees earning more than 2000 AND working in deptno 20
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "$or": [
+    {
+      "sal": {
+        "$gt": 2000
+      }
+    },
+    {
+      "deptno": 20
+    }
+  ]
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+jones   manager    2975  20
+scott   analyst    3000  20
+ford    analyst    3000  20
+
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+Q2) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> managers working in department 30
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "$or": [
+    {
+      "job": "manager"
+    },
+    {
+      "deptno": 30
+    }
+  ]
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+blake   manager    2850  30
+
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+Q3) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> clerks earning below 1000
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "$or": [
+    {
+      "job": "clerk"
+    },
+    {
+      "sal": {
+        "$lt": 1000
+      }
+    }
+  ]
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+smith   clerk      800   20
+james   clerk      950   30
+
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+Q4) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> salesmen having commission (simulated) above 0
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "$or": [
+    {
+      "job": "salesman"
+    },
+    {
+      "comm": {
+        "$gt": 0
+      }
+    }
+  ]
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+allen   salesman   1600  30
+ward    salesman   1250  30
+martin  salesman   1250  30
+
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+Q5) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> managers earning above 2500
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "$or": [
+    {
+      "job": "manager"
+    },
+    {
+      "sal": {
+        "$gt": 2500
+      }
+    }
+  ]
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+jones   manager    2975  20
+blake   manager    2850  30
+
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+Q6) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> employees earning more than 2000 AND working in deptno 20
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "$or": [
+    {
+      "sal": {
+        "$gt": 2000
+      }
+    },
+    {
+      "deptno": 20
+    }
+  ]
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+jones   manager    2975  20
+scott   analyst    3000  20
+ford    analyst    3000  20
+
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+Q7) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> managers working in department 30
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "$or": [
+    {
+      "job": "manager"
+    },
+    {
+      "deptno": 30
+    }
+  ]
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+blake   manager    2850  30
+
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+Q8) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> clerks earning below 1000
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "$or": [
+    {
+      "job": "clerk"
+    },
+    {
+      "sal": {
+        "$lt": 1000
+      }
+    }
+  ]
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+smith   clerk      800   20
+james   clerk      950   30
+
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+Q9) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> salesmen having commission (simulated) above 0
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "$or": [
+    {
+      "job": "salesman"
+    },
+    {
+      "comm": {
+        "$gt": 0
+      }
+    }
+  ]
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+allen   salesman   1600  30
+ward    salesman   1250  30
+martin  salesman   1250  30
+
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+Q10) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> managers earning above 2500
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "$or": [
+    {
+      "job": "manager"
+    },
+    {
+      "sal": {
+        "$gt": 2500
+      }
+    }
+  ]
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+jones   manager    2975  20
+blake   manager    2850  30
+
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+Q11) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> employees earning more than 2000 AND working in deptno 20
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "$or": [
+    {
+      "sal": {
+        "$gt": 2000
+      }
+    },
+    {
+      "deptno": 20
+    }
+  ]
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+jones   manager    2975  20
+scott   analyst    3000  20
+ford    analyst    3000  20
+
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+Q12) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> managers working in department 30
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "$or": [
+    {
+      "job": "manager"
+    },
+    {
+      "deptno": 30
+    }
+  ]
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+blake   manager    2850  30
+
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+Q13) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> clerks earning below 1000
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "$or": [
+    {
+      "job": "clerk"
+    },
+    {
+      "sal": {
+        "$lt": 1000
+      }
+    }
+  ]
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+smith   clerk      800   20
+james   clerk      950   30
+
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+Q14) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> salesmen having commission (simulated) above 0
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "$or": [
+    {
+      "job": "salesman"
+    },
+    {
+      "comm": {
+        "$gt": 0
+      }
+    }
+  ]
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+allen   salesman   1600  30
+ward    salesman   1250  30
+martin  salesman   1250  30
+
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+Q15) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> managers earning above 2500
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "$or": [
+    {
+      "job": "manager"
+    },
+    {
+      "sal": {
+        "$gt": 2500
+      }
+    }
+  ]
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+jones   manager    2975  20
+blake   manager    2850  30
+
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+Q16) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> employees earning more than 2000 AND working in deptno 20
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "$or": [
+    {
+      "sal": {
+        "$gt": 2000
+      }
+    },
+    {
+      "deptno": 20
+    }
+  ]
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+jones   manager    2975  20
+scott   analyst    3000  20
+ford    analyst    3000  20
+
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+Q17) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> managers working in department 30
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "$or": [
+    {
+      "job": "manager"
+    },
+    {
+      "deptno": 30
+    }
+  ]
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+blake   manager    2850  30
+
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+Q18) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> clerks earning below 1000
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "$or": [
+    {
+      "job": "clerk"
+    },
+    {
+      "sal": {
+        "$lt": 1000
+      }
+    }
+  ]
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+smith   clerk      800   20
+james   clerk      950   30
+
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+Q19) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> salesmen having commission (simulated) above 0
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "$or": [
+    {
+      "job": "salesman"
+    },
+    {
+      "comm": {
+        "$gt": 0
+      }
+    }
+  ]
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+allen   salesman   1600  30
+ward    salesman   1250  30
+martin  salesman   1250  30
+
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+Q20) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> managers earning above 2500
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "$or": [
+    {
+      "job": "manager"
+    },
+    {
+      "sal": {
+        "$gt": 2500
+      }
+    }
+  ]
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+jones   manager    2975  20
+blake   manager    2850  30
+
+--------------------------------------------------------------------
+
+
+==================== $nor (20 QnA) ====================
+
+--------------------------------------------------------------------
+Q1) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> employees earning more than 2000 AND working in deptno 20
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "$nor": [
+    {
+      "sal": {
+        "$gt": 2000
+      }
+    },
+    {
+      "deptno": 20
+    }
+  ]
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+jones   manager    2975  20
+scott   analyst    3000  20
+ford    analyst    3000  20
+
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+Q2) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> managers working in department 30
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "$nor": [
+    {
+      "job": "manager"
+    },
+    {
+      "deptno": 30
+    }
+  ]
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+blake   manager    2850  30
+
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+Q3) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> clerks earning below 1000
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "$nor": [
+    {
+      "job": "clerk"
+    },
+    {
+      "sal": {
+        "$lt": 1000
+      }
+    }
+  ]
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+smith   clerk      800   20
+james   clerk      950   30
+
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+Q4) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> salesmen having commission (simulated) above 0
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "$nor": [
+    {
+      "job": "salesman"
+    },
+    {
+      "comm": {
+        "$gt": 0
+      }
+    }
+  ]
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+allen   salesman   1600  30
+ward    salesman   1250  30
+martin  salesman   1250  30
+
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+Q5) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> managers earning above 2500
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "$nor": [
+    {
+      "job": "manager"
+    },
+    {
+      "sal": {
+        "$gt": 2500
+      }
+    }
+  ]
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+jones   manager    2975  20
+blake   manager    2850  30
+
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+Q6) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> employees earning more than 2000 AND working in deptno 20
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "$nor": [
+    {
+      "sal": {
+        "$gt": 2000
+      }
+    },
+    {
+      "deptno": 20
+    }
+  ]
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+jones   manager    2975  20
+scott   analyst    3000  20
+ford    analyst    3000  20
+
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+Q7) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> managers working in department 30
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "$nor": [
+    {
+      "job": "manager"
+    },
+    {
+      "deptno": 30
+    }
+  ]
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+blake   manager    2850  30
+
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+Q8) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> clerks earning below 1000
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "$nor": [
+    {
+      "job": "clerk"
+    },
+    {
+      "sal": {
+        "$lt": 1000
+      }
+    }
+  ]
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+smith   clerk      800   20
+james   clerk      950   30
+
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+Q9) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> salesmen having commission (simulated) above 0
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "$nor": [
+    {
+      "job": "salesman"
+    },
+    {
+      "comm": {
+        "$gt": 0
+      }
+    }
+  ]
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+allen   salesman   1600  30
+ward    salesman   1250  30
+martin  salesman   1250  30
+
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+Q10) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> managers earning above 2500
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "$nor": [
+    {
+      "job": "manager"
+    },
+    {
+      "sal": {
+        "$gt": 2500
+      }
+    }
+  ]
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+jones   manager    2975  20
+blake   manager    2850  30
+
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+Q11) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> employees earning more than 2000 AND working in deptno 20
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "$nor": [
+    {
+      "sal": {
+        "$gt": 2000
+      }
+    },
+    {
+      "deptno": 20
+    }
+  ]
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+jones   manager    2975  20
+scott   analyst    3000  20
+ford    analyst    3000  20
+
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+Q12) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> managers working in department 30
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "$nor": [
+    {
+      "job": "manager"
+    },
+    {
+      "deptno": 30
+    }
+  ]
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+blake   manager    2850  30
+
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+Q13) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> clerks earning below 1000
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "$nor": [
+    {
+      "job": "clerk"
+    },
+    {
+      "sal": {
+        "$lt": 1000
+      }
+    }
+  ]
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+smith   clerk      800   20
+james   clerk      950   30
+
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+Q14) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> salesmen having commission (simulated) above 0
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "$nor": [
+    {
+      "job": "salesman"
+    },
+    {
+      "comm": {
+        "$gt": 0
+      }
+    }
+  ]
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+allen   salesman   1600  30
+ward    salesman   1250  30
+martin  salesman   1250  30
+
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+Q15) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> managers earning above 2500
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "$nor": [
+    {
+      "job": "manager"
+    },
+    {
+      "sal": {
+        "$gt": 2500
+      }
+    }
+  ]
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+jones   manager    2975  20
+blake   manager    2850  30
+
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+Q16) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> employees earning more than 2000 AND working in deptno 20
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "$nor": [
+    {
+      "sal": {
+        "$gt": 2000
+      }
+    },
+    {
+      "deptno": 20
+    }
+  ]
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+jones   manager    2975  20
+scott   analyst    3000  20
+ford    analyst    3000  20
+
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+Q17) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> managers working in department 30
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "$nor": [
+    {
+      "job": "manager"
+    },
+    {
+      "deptno": 30
+    }
+  ]
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+blake   manager    2850  30
+
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+Q18) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> clerks earning below 1000
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "$nor": [
+    {
+      "job": "clerk"
+    },
+    {
+      "sal": {
+        "$lt": 1000
+      }
+    }
+  ]
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+smith   clerk      800   20
+james   clerk      950   30
+
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+Q19) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> salesmen having commission (simulated) above 0
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "$nor": [
+    {
+      "job": "salesman"
+    },
+    {
+      "comm": {
+        "$gt": 0
+      }
+    }
+  ]
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+allen   salesman   1600  30
+ward    salesman   1250  30
+martin  salesman   1250  30
+
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+Q20) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> managers earning above 2500
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "$nor": [
+    {
+      "job": "manager"
+    },
+    {
+      "sal": {
+        "$gt": 2500
+      }
+    }
+  ]
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+jones   manager    2975  20
+blake   manager    2850  30
+
+--------------------------------------------------------------------
+
+
+==================== $not (20 QnA) ====================
+
+--------------------------------------------------------------------
+Q1) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> employees earning more than 2000 AND working in deptno 20
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "sal": {
+    "$not": {
+      "$gt": 2000
+    }
+  }
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+jones   manager    2975  20
+scott   analyst    3000  20
+ford    analyst    3000  20
+
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+Q2) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> managers working in department 30
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "job": {
+    "$not": "manager"
+  }
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+blake   manager    2850  30
+
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+Q3) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> clerks earning below 1000
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "job": {
+    "$not": "clerk"
+  }
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+smith   clerk      800   20
+james   clerk      950   30
+
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+Q4) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> salesmen having commission (simulated) above 0
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "job": {
+    "$not": "salesman"
+  }
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+allen   salesman   1600  30
+ward    salesman   1250  30
+martin  salesman   1250  30
+
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+Q5) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> managers earning above 2500
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "job": {
+    "$not": "manager"
+  }
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+jones   manager    2975  20
+blake   manager    2850  30
+
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+Q6) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> employees earning more than 2000 AND working in deptno 20
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "sal": {
+    "$not": {
+      "$gt": 2000
+    }
+  }
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+jones   manager    2975  20
+scott   analyst    3000  20
+ford    analyst    3000  20
+
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+Q7) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> managers working in department 30
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "job": {
+    "$not": "manager"
+  }
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+blake   manager    2850  30
+
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+Q8) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> clerks earning below 1000
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "job": {
+    "$not": "clerk"
+  }
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+smith   clerk      800   20
+james   clerk      950   30
+
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+Q9) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> salesmen having commission (simulated) above 0
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "job": {
+    "$not": "salesman"
+  }
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+allen   salesman   1600  30
+ward    salesman   1250  30
+martin  salesman   1250  30
+
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+Q10) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> managers earning above 2500
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "job": {
+    "$not": "manager"
+  }
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+jones   manager    2975  20
+blake   manager    2850  30
+
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+Q11) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> employees earning more than 2000 AND working in deptno 20
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "sal": {
+    "$not": {
+      "$gt": 2000
+    }
+  }
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+jones   manager    2975  20
+scott   analyst    3000  20
+ford    analyst    3000  20
+
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+Q12) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> managers working in department 30
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "job": {
+    "$not": "manager"
+  }
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+blake   manager    2850  30
+
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+Q13) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> clerks earning below 1000
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "job": {
+    "$not": "clerk"
+  }
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+smith   clerk      800   20
+james   clerk      950   30
+
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+Q14) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> salesmen having commission (simulated) above 0
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "job": {
+    "$not": "salesman"
+  }
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+allen   salesman   1600  30
+ward    salesman   1250  30
+martin  salesman   1250  30
+
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+Q15) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> managers earning above 2500
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "job": {
+    "$not": "manager"
+  }
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+jones   manager    2975  20
+blake   manager    2850  30
+
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+Q16) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> employees earning more than 2000 AND working in deptno 20
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "sal": {
+    "$not": {
+      "$gt": 2000
+    }
+  }
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+jones   manager    2975  20
+scott   analyst    3000  20
+ford    analyst    3000  20
+
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+Q17) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> managers working in department 30
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "job": {
+    "$not": "manager"
+  }
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+blake   manager    2850  30
+
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+Q18) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> clerks earning below 1000
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "job": {
+    "$not": "clerk"
+  }
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+smith   clerk      800   20
+james   clerk      950   30
+
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+Q19) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> salesmen having commission (simulated) above 0
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "job": {
+    "$not": "salesman"
+  }
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+allen   salesman   1600  30
+ward    salesman   1250  30
+martin  salesman   1250  30
+
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+Q20) WAQTD the employee name, job, salary and department number of
+all employees who satisfy the condition:
+   --> managers earning above 2500
+--------------------------------------------------------------------
+
+MongoDB Query:
+db.emp.find(
+  {
+  "job": {
+    "$not": "manager"
+  }
+},
+  {
+    "ename":1,
+    "job":1,
+    "sal":1,
+    "deptno":1,
+    "_id":0
+  }
+);
+
+Expected Output:
+ename   job        sal   deptno
+-----------------------------------
+jones   manager    2975  20
+blake   manager    2850  30
+
+
+
+--------------------------------------------------------------------
