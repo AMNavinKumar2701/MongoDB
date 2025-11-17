@@ -1,0 +1,248 @@
+
+===========================================
+ MONGODB ELEMENT OPERATORS-->Used to test whether a field exists, and the type of the field.
+===========================================
+
+OPERATORS COVERED:
+1) $exists
+2) $type
+
+============================================================
+SAMPLE EMP DATA (USED FOR OUTPUTS)
+============================================================
+empno | ename  | job
+---------------------------------
+7369  | smith  | clerk
+7499  | allen  | salesman
+7521  | ward   | salesman
+7566  | jones  | manager
+7654  | martin | salesman
+7698  | blake  | manager
+7782  | clark  | manager
+7788  | scott  | analyst
+7839  | king   | president
+7844  | turner | salesman
+7876  | adams  | clerk
+7900  | james  | clerk
+7902  | ford   | analyst
+7934  | miller | clerk
+
+
+============================================================
+1) $exists OPERATOR – 
+============================================================
+⭐ 1. $exists Operator:------
+Theory:--
+Checks whether a field exists (present or not).
+Does NOT check value (null or non-null both count as existing).
+
+Behavior:---
+$exists: true → field must exist
+$exists: false → field must not exist
+
+Communication Flow:----
+Storage engine scans BSON documents.
+Checks presence of field key.
+Returns docs based on existence evaluation.
+-----------------------------------------
+EXAMPLES:(20 QnA):---
+------------------------------------------
+Q1) WAQTD employees where 'comm' exists
+A: db.emp.find({ comm: { $exists: true } })
+Output: allen, ward, martin, turner
+
+Q2) WAQTD employees where 'comm' does NOT exist
+A: db.emp.find({ comm: { $exists: false } })
+Output: all except above 4
+
+Q3) WAQTD employees where 'mgr' exists
+A: db.emp.find({ mgr: { $exists: true } })
+Output: all except king
+
+Q4) WAQTD employees where 'mgr' does NOT exist
+A: db.emp.find({ mgr: { $exists: false } })
+Output: king
+
+Q5) WAQTD employees where 'sal' field exists
+A: db.emp.find({ sal: { $exists: true } })
+Output: all employees
+
+Q6) WAQTD employees where deptno field exists
+A: db.emp.find({ deptno: { $exists: true } })
+Output: all employees
+
+Q7) WAQTD employees where job field exists
+A: db.emp.find({ job: { $exists: true } })
+Output: all employees
+
+Q8) WAQTD employees with missing job field
+A: db.emp.find({ job: { $exists: false } })
+Output: none
+
+Q9) WAQTD employees where hiredate exists
+A: db.emp.find({ hiredate: { $exists: true } })
+Output: all
+
+Q10) WAQTD employees where comm is exactly null (exists but null)
+A: db.emp.find({ comm: { $exists: true }, comm: null })
+Output: smith, jones, blake, clark, scott, king, adams, james, ford, miller
+
+Q11) WAQTD employees where comm exists AND is not null
+A: db.emp.find({ comm: { $exists: true, $ne: null } })
+Output: allen, ward, martin, turner
+
+Q12) WAQTD employees where mgr exists AND is > 7700
+A: db.emp.find({ mgr: { $exists: true }, mgr: { $gt: 7700 } })
+Output: smith, jones, blake, clark, adams, james
+
+Q13) WAQTD employees where ename exists AND starts with 's'
+A: db.emp.find({ ename: { $exists: true }, ename: /^s/i })
+Output: smith, scott
+
+Q14) WAQTD employees where job does NOT exist OR comm exists
+A: db.emp.find({ $or: [ { job: { $exists: false } }, { comm: { $exists: true } } ] })
+Output: allen, ward, martin, turner
+
+Q15) WAQTD employees where deptno exists AND deptno = 30
+A: db.emp.find({ deptno: { $exists: true }, deptno: 30 })
+Output: allen, ward, martin, blake, turner, james
+
+Q16) WAQTD employees where job exists AND contains 'man'
+A: db.emp.find({ job: { $exists: true }, job: /man/ })
+Output: jones, blake, clark
+
+Q17) WAQTD employees where hiredate does NOT exist
+A: db.emp.find({ hiredate: { $exists: false } })
+Output: none
+
+Q18) WAQTD employees where empno exists and is even
+A: db.emp.find({ empno: { $exists: true }, empno: { $mod: [2,0] } })
+Output: smith, ward, martin, blake, turner, ford
+
+Q19) WAQTD employees where comm does NOT exist but job = clerk
+A: db.emp.find({ comm: { $exists: false }, job: "clerk" })
+Output: smith, adams, james, miller
+
+Q20) WAQTD employees where mgr exists and equal to 7698
+A: db.emp.find({ mgr: { $exists: true }, mgr: 7698 })
+Output: allen, ward, martin, turner, james
+
+
+============================================================
+2) $type OPERATOR – 
+============================================================
+⭐ 2. $type Operator
+Theory
+Used to test the data type of a field.
+Each BSON type has a numeric code.
+
+Common Types:
+--------------
+Type	  | Code
+---------------
+Double	   1
+String	   2
+Object	   3
+Array	     4
+Boolean	   8
+Date	     9
+Null	     10
+Int32	     16
+Int64	     18
+---------------
+Behavior:---
+MongoDB checks the internal BSON type stored for each field.
+
+Communication Flow:----
+Engine reads BSON type metadata.
+Compares with user-requested type.
+Returns only matching documents.
+
+-----------------------------------------
+EXAMPLES:(20 QnA):---
+------------------------------------------
+Q1) WAQTD employees whose deptno is Int32
+A: db.emp.find({ deptno: { $type: 16 } })
+Output: all employees
+
+Q2) WAQTD employees whose hiredate is Date type
+A: db.emp.find({ hiredate: { $type: 9 } })
+Output: all employees
+
+Q3) WAQTD employees whose comm is Null type
+A: db.emp.find({ comm: { $type: "null" } })
+Output: smith, jones, blake, clark, scott, king, adams, james, ford, miller
+
+Q4) WAQTD employees whose comm is number type
+A: db.emp.find({ comm: { $type: "number" } })
+Output: allen, ward, martin, turner
+
+Q5) WAQTD employees whose ename is String
+A: db.emp.find({ ename: { $type: "string" } })
+Output: all
+
+Q6) WAQTD employees whose job is String
+A: db.emp.find({ job: { $type: 2 } })
+Output: all
+
+Q7) WAQTD employees whose mgr is integer
+A: db.emp.find({ mgr: { $type: 16 } })
+Output: all except king
+
+Q8) WAQTD employees whose empno is integer
+A: db.emp.find({ empno: { $type: 16 } })
+Output: all
+
+Q9) WAQTD employees whose comm is NOT number
+A: db.emp.find({ comm: { $not: { $type: "number" } } })
+Output: all except allen, ward, martin, turner
+
+Q10) WAQTD employees whose hiredate is NOT date
+A: db.emp.find({ hiredate: { $not: { $type: 9 } } })
+Output: none
+
+Q11) WAQTD employees whose ename is NOT string
+A: db.emp.find({ ename: { $not: { $type: 2 } } })
+Output: none
+
+Q12) WAQTD employees whose comm is either NULL or number
+A: db.emp.find({ comm: { $type: ["null", "number"] } })
+Output: all employees
+
+Q13) WAQTD employees whose mgr is either null or integer
+A: db.emp.find({ mgr: { $type: [10, 16] } })
+Output: all employees
+
+Q14) WAQTD employees with comm field as null type ONLY
+A: db.emp.find({ comm: { $type: 10 } })
+Output: smith, jones, blake, clark, scott, king, adams, james, ford, miller
+
+Q15) WAQTD employees with hiredate as string (wrong type)
+A: db.emp.find({ hiredate: { $type: 2 } })
+Output: none
+
+Q16) WAQTD employees with job type string AND empno type int
+A: db.emp.find({ job: { $type: 2 }, empno: { $type: 16 } })
+Output: all
+
+Q17) WAQTD employees with comm=0 (int type but value zero)
+A: db.emp.find({ comm: { $type: "number" }, comm: 0 })
+Output: turner
+
+Q18) WAQTD employees whose deptno NOT int32
+A: db.emp.find({ deptno: { $not: { $type: 16 } } })
+Output: none
+
+Q19) WAQTD employees where comm is either null or missing
+A: db.emp.find({ comm: { $type: 10 } })
+Output: (only null ones)
+
+Q20) WAQTD employees whose mgr is null type
+A: db.emp.find({ mgr: { $type: 10 } })
+Output: king
+
+
+============================================================
+
+============================================================
+
