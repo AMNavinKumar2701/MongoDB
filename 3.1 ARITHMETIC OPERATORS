@@ -1,0 +1,656 @@
+=======================================================================
+          MONGODB ARITHMETIC OPERATORS
+=======================================================================
+MongoDB arithmetic operators are primarily used within the Aggregation Pipeline
+to perform mathematical operations on numeric fields in your documents.
+
+
+## SAMPLE DATA USED (from your file)
+Collection: emp
+Fields used: empno, ename, sal, comm, deptno, mgr
+
+=======================================================================
+1. OPERATOR: $add
+=======================================================================
+CONCEPT:
+Performs addition of numbers. You can add fields, constants,
+or mix both.
+
+BEHAVIOR:
+
+* null is treated as 0
+* missing field becomes null → treated as 0
+* supports multiple operands
+
+SYNTAX:
+{ $add: [ <exp1>, <exp2>, ... ] }
+
+---
+
+## EXAMPLES (with questions)
+
+Q1) Calculate total earnings (salary + commission)
+db.emp.aggregate([
+{ $project: { ename: 1, totalEarnings: { $add: ["$sal", "$comm"] } } }
+])
+
+Q2) Add 500 bonus to salary
+db.emp.aggregate([
+{ $project: { ename: 1, newSalary: { $add: ["$sal", 500] } } }
+])
+
+Q3) Salary + commission + deptno
+db.emp.aggregate([
+{ $project: { ename: 1, weirdSum: { $add: ["$sal", "$comm", "$deptno"] } } }
+])
+
+---
+=======================================================================
+2. OPERATOR: $subtract
+=======================================================================
+CONCEPT:
+Subtracts one value from another. Only 2 operands allowed.
+
+BEHAVIOR:
+
+* null treated as 0
+* $subtract: [A, B] = A - B
+
+SYNTAX:
+{ $subtract: [ <A>, <B> ] }
+
+---
+
+## EXAMPLES
+
+Q1) Difference between salary and commission
+db.emp.aggregate([
+{ $project: { ename: 1, diff: { $subtract: ["$sal", "$comm"] } } }
+])
+
+Q2) How much salary exceeds 1000
+db.emp.aggregate([
+{ $project: { ename: 1, above1000: { $subtract: ["$sal", 1000] } } }
+])
+
+Q3) Manager gap compared to 7000 (demo)
+db.emp.aggregate([
+{ $project: { ename: 1, mgrGap: { $subtract: ["$mgr", 7000] } } }
+])
+
+---
+=======================================================================
+3. OPERATOR: $multiply
+=======================================================================
+CONCEPT:
+Multiplies values.
+
+BEHAVIOR:
+
+* missing/null fields → treated as 0 (result becomes 0)
+* supports multiple operands
+
+SYNTAX:
+{ $multiply: [ <exp1>, <exp2>, ... ] }
+
+---
+
+## EXAMPLES
+
+Q1) 10% bonus
+db.emp.aggregate([
+{ $project: { ename: 1, bonus10percent: { $multiply: ["$sal", 0.10] } } }
+])
+
+Q2) Annual salary (monthly × 12)
+db.emp.aggregate([
+{ $project: { ename: 1, annual: { $multiply: ["$sal", 12] } } }
+])
+
+Q3) Double commission
+db.emp.aggregate([
+{ $project: { ename: 1, doubledComm: { $multiply: ["$comm", 2] } } }
+])
+
+---
+=======================================================================
+4. OPERATOR: $divide
+=======================================================================
+CONCEPT:
+Divides one value by another.
+
+BEHAVIOR:
+
+* division by zero → error
+* null → treated as 0 → error
+
+SYNTAX:
+{ $divide: [ <A>, <B> ] }
+
+---
+
+## EXAMPLES
+
+Q1) Salary per deptno
+db.emp.aggregate([
+{ $project: { ename: 1, salPerDept: { $divide: ["$sal", "$deptno"] } } }
+])
+
+Q2) Commission-to-salary ratio
+db.emp.aggregate([
+{ $project: { ename: 1, commRatio: { $divide: ["$comm", "$sal"] } } }
+])
+
+Q3) Salary divided by 1000
+db.emp.aggregate([
+{ $project: { ename: 1, thousands: { $divide: ["$sal", 1000] } } }
+])
+
+---
+=======================================================================
+5. OPERATOR: $mod
+=======================================================================
+
+CONCEPT:
+Returns the remainder after division.
+
+BEHAVIOR:
+
+* exactly two operands
+
+SYNTAX:
+{ $mod: [ <A>, <B> ] }
+
+---
+
+## EXAMPLES
+
+Q1) Check odd or even empno
+db.emp.aggregate([
+{ $project: { ename: 1, isOdd: { $mod: ["$empno", 2] } } }
+])
+
+Q2) Group by deptno % 10
+db.emp.aggregate([
+{ $project: { ename: 1, deptGroup: { $mod: ["$deptno", 10] } } }
+])
+
+Q3) Salary % 500
+db.emp.aggregate([
+{ $project: { ename: 1, rem: { $mod: ["$sal", 500] } } }
+])
+
+---
+=======================================================================
+6. OPERATOR: $abs
+=======================================================================
+CONCEPT:
+Converts negative to positive.
+
+BEHAVIOR:
+
+* if already positive → unchanged
+
+SYNTAX:
+{ $abs: <exp> }
+
+---
+
+## EXAMPLES
+
+Q1) Absolute difference of salary and commission
+db.emp.aggregate([
+{ $project: { ename: 1, absDiff: { $abs: { $subtract: ["$sal", "$comm"] } } } }
+])
+
+Q2) abs of -200
+db.emp.aggregate([
+{ $project: { val: { $abs: -200 } } }
+])
+
+Q3) Positive remainder from mod
+db.emp.aggregate([
+{ $project: { ename: 1, absMod: { $abs: { $mod: ["$sal", -300] } } } }
+])
+
+---
+=======================================================================
+7. OPERATOR: $ceil
+=======================================================================
+---
+
+CONCEPT:
+Round up to nearest integer.
+
+SYNTAX:
+{ $ceil: <exp> }
+
+---
+
+## EXAMPLES
+
+Q1) ceil(salary/1023)
+db.emp.aggregate([
+{ $project: { ename: 1, ceilVal: { $ceil: { $divide: ["$sal", 1023] } } } }
+])
+
+Q2) ceil(comm/333)
+db.emp.aggregate([
+{ $project: { ename: 1, ceilC: { $ceil: { $divide: ["$comm", 333] } } } }
+])
+
+Q3) ceil(salary/7)
+db.emp.aggregate([
+{ $project: { ename: 1, ceil7: { $ceil: { $divide: ["$sal", 7] } } } }
+])
+
+---
+=======================================================================
+8. OPERATOR: $floor
+=======================================================================
+CONCEPT:
+Round down to nearest integer.
+
+SYNTAX:
+{ $floor: <exp> }
+
+---
+
+## EXAMPLES
+
+Q1) floor(salary/55)
+db.emp.aggregate([
+{ $project: { ename: 1, f1: { $floor: { $divide: ["$sal", 55] } } } }
+])
+
+Q2) floor(comm/77)
+db.emp.aggregate([
+{ $project: { ename: 1, f2: { $floor: { $divide: ["$comm", 77] } } } }
+])
+
+Q3) floor(salary/3)
+db.emp.aggregate([
+{ $project: { ename: 1, f3: { $floor: { $divide: ["$sal", 3] } } } }
+])
+
+---
+=======================================================================
+9. OPERATOR: $round
+=======================================================================
+---
+
+CONCEPT:
+Rounds to nearest integer or nearest decimal place.
+
+SYNTAX:
+{ $round: [ <exp>, <place> ] }
+
+---
+
+## EXAMPLES
+
+Q1) round(salary/7)
+db.emp.aggregate([
+{ $project: { ename: 1, r1: { $round: [ { $divide: ["$sal", 7] }, 0 ] } } }
+])
+
+Q2) round(salary/13, 2 decimals)
+db.emp.aggregate([
+{ $project: { ename: 1, r2: { $round: [ { $divide: ["$sal", 13] }, 2 ] } } }
+])
+
+Q3) round(comm/9)
+db.emp.aggregate([
+{ $project: { ename: 1, r3: { $round: [ { $divide: ["$comm", 9] }, 0 ] } } }
+])
+
+---
+=======================================================================
+10. OPERATOR: $trunc
+=======================================================================
+---
+
+CONCEPT:
+Removes decimal portion without rounding.
+
+SYNTAX:
+{ $trunc: [ <exp>, <place> ] }
+
+---
+
+## EXAMPLES
+
+Q1) trunc(salary/7)
+db.emp.aggregate([
+{ $project: { ename: 1, t1: { $trunc: [ { $divide: ["$sal", 7] }, 0 ] } } }
+])
+
+Q2) trunc(comm/8, 2 decimals)
+db.emp.aggregate([
+{ $project: { ename: 1, t2: { $trunc: [ { $divide: ["$comm", 8] }, 2 ] } } }
+])
+
+Q3) trunc(salary/123)
+db.emp.aggregate([
+{ $project: { ename: 1, t3: { $trunc: [ { $divide: ["$sal", 123] }, 0 ] } } }
+])
+
+---
+=======================================================================
+11. OPERATOR: $sqrt
+=======================================================================
+---
+
+CONCEPT:
+Returns square root.
+
+BEHAVIOR:
+* negative values → error
+
+SYNTAX:
+{ $sqrt: <exp> }
+
+## EXAMPLES
+
+Q1) sqrt(salary)
+db.emp.aggregate([
+{ $project: { ename: 1, s1: { $sqrt: "$sal" } } }
+])
+
+Q2) sqrt(commission)
+db.emp.aggregate([
+{ $project: { ename: 1, s2: { $sqrt: "$comm" } } }
+])
+
+Q3) sqrt(salary/10)
+db.emp.aggregate([
+{ $project: { ename: 1, s3: { $sqrt: { $divide: ["$sal", 10] } } } }
+])
+
+---
+=======================================================================
+12. EXPONENT OPERATORS ($exp, $ln, $log, $log10, $pow)
+=======================================================================
+12.1) $exp
+CONCEPT: e raised to given value
+SYNTAX: { $exp: <exp> }
+
+EXAMPLES:
+Q1) exp(salary/1000)
+Q2) exp(comm/100)
+Q3) exp(deptno)
+=======================================================================
+12.2) $ln
+CONCEPT: natural log
+SYNTAX: { $ln: <exp> }
+
+EXAMPLES:
+Q1) ln(sal)
+Q2) ln(comm)
+Q3) ln(sal + comm)
+=======================================================================
+12.3) $log
+CONCEPT: log base N
+SYNTAX: { $log: [ <exp>, <base> ] }
+
+EXAMPLES:
+Q1) log base 2 of salary
+Q2) log base 10 of comm
+Q3) log base 5 of deptno
+=======================================================================
+12.4) $log10
+CONCEPT: log base 10
+SYNTAX: { $log10: <exp> }
+
+EXAMPLES:
+Q1) log10(salary)
+Q2) log10(comm)
+Q3) log10(deptno)
+=======================================================================
+12.5) $pow
+CONCEPT: exponent power
+SYNTAX: { $pow: [ <number>, <power> ] }
+
+EXAMPLES:
+Q1) salary squared
+Q2) commission cube
+Q3) deptno power 2
+=======================================================================
+-----------------Arthmetic Update Operators------------------------
+Perfect.
+Now I will generate **Option 1: Classic Arithmetic Update Operators** in the **same exact attractive, well-structured, .TXT-friendly style** as your previous file.
+
+Copy → Paste → Save as:
+**MongoDB_Arithmetic_Update_Operators.txt**
+
+---
+
+---
+
+MONGODB ARITHMETIC UPDATE OPERATORS
+FULL THEORY + BEHAVIOR + SYNTAX + 3 EXAMPLES EACH
+USING SAMPLE emp DATA
+
+---
+
+## SAMPLE DATA USED
+
+Collection: emp
+Fields used: empno, ename, sal, comm, deptno, mgr
+
+---
+
+## LIST OF ARITHMETIC UPDATE OPERATORS
+
+1. $inc        (Increment numerical value)
+2. $mul        (Multiply existing value)
+3. $min        (Set field to minimum of existing vs new)
+4. $max        (Set field to maximum of existing vs new)
+5. $currentDate (Set field to date or timestamp – partially arithmetic)
+
+---
+
+1. OPERATOR: $inc
+
+---
+
+CONCEPT:
+
+* Increases or decreases a numeric field by a specified value.
+* If field does not exist → MongoDB creates it and initializes to 0.
+
+BEHAVIOR:
+
+* Can apply to multiple fields at once.
+* Positive value = increment
+* Negative value = decrement
+* Works only with numeric fields.
+
+SYNTAX:
+{ $inc: { <field1>: <value>, <field2>: <value> } }
+
+---
+
+## EXAMPLES (with questions)
+
+Q1) Increase salary of empno 7369 by 500.
+db.emp.updateOne(
+{ empno: 7369 },
+{ $inc: { sal: 500 } }
+)
+
+Q2) Decrease commission of empno 7521 by 100.
+db.emp.updateOne(
+{ empno: 7521 },
+{ $inc: { comm: -100 } }
+)
+
+Q3) Add +2 years experience field (field does not exist → will be created).
+db.emp.updateMany(
+{},
+{ $inc: { experience: 2 } }
+)
+
+---
+
+2. OPERATOR: $mul
+
+---
+
+CONCEPT:
+Multiplies the current value by a given number.
+
+BEHAVIOR:
+
+* If field missing → created and initialized to 0 → result 0.
+* Useful to apply percentage raise, scaling values, etc.
+
+SYNTAX:
+{ $mul: { <field>: <number> } }
+
+---
+
+## EXAMPLES
+
+Q1) Multiply salary of empno 7698 by 1.10 (10% raise).
+db.emp.updateOne(
+{ empno: 7698 },
+{ $mul: { sal: 1.10 } }
+)
+
+Q2) Double the commission of all salesman.
+db.emp.updateMany(
+{ job: "salesman" },
+{ $mul: { comm: 2 } }
+)
+
+Q3) Zero out a field by multiplying with 0.
+db.emp.updateOne(
+{ empno: 7839 },
+{ $mul: { comm: 0 } }
+)
+
+---
+
+3. OPERATOR: $min
+
+---
+
+CONCEPT:
+Sets the field to a new value only if the NEW value is LESS than the existing one.
+
+BEHAVIOR:
+
+* Performs comparison: if newValue < existingValue → update
+* If field missing → new value inserted
+
+SYNTAX:
+{ $min: { <field>: <value> } }
+
+---
+
+## EXAMPLES
+
+Q1) Set salary of empno 7782 to 2000 only if 2000 is smaller.
+db.emp.updateOne(
+{ empno: 7782 },
+{ $min: { sal: 2000 } }
+)
+
+Q2) For all managers, set commission = 100 only if 100 < their current comm.
+db.emp.updateMany(
+{ job: "manager" },
+{ $min: { comm: 100 } }
+)
+
+Q3) Ensure deptno is minimum 10 (if anyone has more than 10, stays).
+db.emp.updateMany(
+{},
+{ $min: { deptno: 10 } }
+)
+
+---
+
+4. OPERATOR: $max
+
+---
+
+CONCEPT:
+Sets the field to the new value only if the NEW value is GREATER than the existing one.
+
+BEHAVIOR:
+
+* Performs comparison: if newValue > existingValue → update
+* If field missing → new value inserted
+
+SYNTAX:
+{ $max: { <field>: <value> } }
+
+---
+
+## EXAMPLES
+
+Q1) Set salary to minimum 3000 if current salary less than 3000.
+db.emp.updateOne(
+{ empno: 7369 },
+{ $max: { sal: 3000 } }
+)
+
+Q2) Set commission of all salesman to at least 500.
+db.emp.updateMany(
+{ job: "salesman" },
+{ $max: { comm: 500 } }
+)
+
+Q3) Set deptno to 50 (only if > existing deptno).
+db.emp.updateMany(
+{},
+{ $max: { deptno: 50 } }
+)
+
+---
+
+5. OPERATOR: $currentDate
+
+---
+
+CONCEPT:
+Updates a field to the current system date/time.
+
+BEHAVIOR:
+
+* Can set date or timestamp.
+* Timestamp uses "timestamp" type.
+* Date uses ISODate.
+
+SYNTAX:
+{
+$currentDate: { <field>: true | { $type: "date" } | { $type: "timestamp" }
+}
+}
+
+---
+
+## EXAMPLES
+
+Q1) Set lastUpdated to current date for empno 7788.
+db.emp.updateOne(
+{ empno: 7788 },
+{ $currentDate: { lastUpdated: true } }
+)
+
+Q2) Set modifiedAt as timestamp for all clerks.
+db.emp.updateMany(
+{ job: "clerk" },
+{ $currentDate: { modifiedAt: { $type: "timestamp" } } }
+)
+
+Q3) Set updatedOn field with a date type.
+db.emp.updateMany(
+{},
+{ $currentDate: { updatedOn: { $type: "date" } } }
+)
+
+
+
+
