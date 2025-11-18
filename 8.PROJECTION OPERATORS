@@ -1,19 +1,10 @@
-
-
 ============================================================
-
-# **MONGODB PROJECTION OPERATORS — INTERVIEW STYLE NOTES (.TXT)**
-
+# **MONGODB PROJECTION OPERATORS —
 ============================================================
 
 ============================================================
-
 # **1) ARRAY FIELD PROJECTION & LIMITATIONS**
-
 ============================================================
-
----
-
 ## **THEORY (BULLET POINTS)**
 
 * Projection controls which fields appear in result.
