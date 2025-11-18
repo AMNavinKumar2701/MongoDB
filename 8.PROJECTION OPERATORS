@@ -48,72 +48,49 @@ db.collection.find({ query }, { arrayField: 0 })
 ## **10 EXAMPLES WITH DESCRIPTIVE QUESTIONS**
 
 1. **Q: Show only the items array for order 1**
-
-```
 db.orders.find({ _id: 1 }, { items: 1, _id: 0 });
-```
+
 
 2. **Q: Show only reviews for order 2**
-
-```
 db.orders.find({ _id: 2 }, { reviews: 1, _id: 0 });
-```
+
 
 3. **Q: Show items and reviews for John**
-
-```
 db.orders.find({ customer: "John" }, { items: 1, reviews: 1 });
-```
 
 4. **Q: Remove items array from output**
-
-```
 db.orders.find({ _id: 1 }, { items: 0 });
-```
+
 
 5. **Q: Exclude reviews for customer Mary**
-
-```
 db.orders.find({ customer: "Mary" }, { reviews: 0 });
-```
+
 
 6. **Q: Include statusLogs only**
-
-```
 db.orders.find({}, { statusLogs: 1 });
-```
+
 
 7. **Q: Show items only, hide _id**
-
-```
 db.orders.find({}, { items: 1, _id: 0 });
-```
+
 
 8. **Q: Show everything except statusLogs**
-
-```
 db.orders.find({ _id: 3 }, { statusLogs: 0 });
-```
+
 
 9. **Q: Show only items array for all orders**
-
-```
 db.orders.find({}, { items: 1, _id: 0 });
-```
+
 
 10. **Q: Include items, reviews, and statusLogs**
-
-```
 db.orders.find({}, { items: 1, reviews: 1, statusLogs: 1 });
-```
+
 
 ============================================================
 
 # **2) `$elemMatch` PROJECTION**
 
 ============================================================
-
----
 
 ## **THEORY (BULLET POINTS)**
 
@@ -136,91 +113,66 @@ db.orders.find({}, { items: 1, reviews: 1, statusLogs: 1 });
 
 ## **SYNTAX**
 
-```
 db.collection.find(
   { query },
   { arrayField: { $elemMatch: { condition } }, _id: 0 }
-)
-```
+);
 
----
 
+------------------------------------------------------------
 ## **10 EXAMPLES WITH QUESTIONS**
 
 1. **Q: Show the item where price > 100 for order 1**
-
-```
 db.orders.find({ _id: 1 }, { items: { $elemMatch: { price: { $gt: 100 } } } });
-```
+
 
 2. **Q: Show the item whose product is "book"**
-
-```
 db.orders.find({ _id: 1 }, { items: { $elemMatch: { product: "book" } } });
-```
+
 
 3. **Q: Show the element where qty >= 10**
-
-```
 db.orders.find({ _id: 1 }, { items: { $elemMatch: { qty: { $gte: 10 } } } });
-```
+
 
 4. **Q: Show item where qty > 1 AND price > 100**
-
-```
 db.orders.find({ _id: 1 },
   { items: { $elemMatch: { qty: { $gt: 1 }, price: { $gt: 100 } } } });
-```
+
 
 5. **Q: Show first review with rating > 4**
-
-```
 db.orders.find({ _id: 2 },
   { reviews: { $elemMatch: { rating: { $gt: 4 } } } });
-```
+
 
 6. **Q: Show status entry equal to 'shipped'**
-
-```
 db.orders.find({ _id: 1 },
   { statusLogs: { $elemMatch: { status: "shipped" } } });
-```
+
 
 7. **Q: Show review where rating = 3**
-
-```
 db.orders.find({ _id: 3 },
   { reviews: { $elemMatch: { rating: 3 } } });
-```
+
 
 8. **Q: Show item with price between 10 and 100**
-
-```
 db.orders.find({ _id: 1 },
   { items: { $elemMatch: { price: { $gte: 10, $lte: 100 } } } });
-```
 
 9. **Q: Show item where qty <= 2**
-
-```
 db.orders.find({ _id: 2 },
   { items: { $elemMatch: { qty: { $lte: 2 } } } });
-```
+
 
 10. **Q: Show statusLog where status='delivered'**
-
-```
 db.orders.find({ _id: 1 },
   { statusLogs: { $elemMatch: { status: "delivered" } } });
-```
+
 
 ============================================================
 
 # **3) `$slice` PROJECTION**
 
 ============================================================
-
----
 
 ## **THEORY (BULLET POINTS)**
 
@@ -238,79 +190,56 @@ db.orders.find({ _id: 1 },
 * Cannot combine with `$elemMatch`.
 * Order preserved.
 
----
 
 ## **SYNTAX**
 
-```
 db.collection.find({}, { arrayField: { $slice: n } })
 db.collection.find({}, { arrayField: { $slice: -n } })
 db.collection.find({}, { arrayField: { $slice: [skip, limit] } })
-```
 
----
+
+---------------------------------------------------------------------
 
 ## **10 EXAMPLES WITH QUESTIONS**
 
 1. **Q: Show first 2 items of order 1**
-
-```
 db.orders.find({ _id: 1 }, { items: { $slice: 2 } });
-```
+
 
 2. **Q: Show last 2 items of order 1**
-
-```
 db.orders.find({ _id: 1 }, { items: { $slice: -2 } });
-```
+
 
 3. **Q: Show first review**
-
-```
 db.orders.find({ _id: 1 }, { reviews: { $slice: 1 } });
-```
+
 
 4. **Q: Show last review**
-
-```
 db.orders.find({ _id: 1 }, { reviews: { $slice: -1 } });
-```
+
 
 5. **Q: Skip 1, show next 2 items**
-
-```
 db.orders.find({ _id: 1 }, { items: { $slice: [1, 2] } });
-```
+
 
 6. **Q: Show first statusLogs entry**
-
-```
 db.orders.find({ _id: 1 }, { statusLogs: { $slice: 1 } });
-```
+
 
 7. **Q: Show last 3 statuses**
-
-```
 db.orders.find({ _id: 1 }, { statusLogs: { $slice: -3 } });
-```
+
 
 8. **Q: Skip first review, show one**
-
-```
 db.orders.find({ _id: 1 }, { reviews: { $slice: [1, 1] } });
-```
 
 9. **Q: Show first 3 items of order 3**
-
-```
 db.orders.find({ _id: 3 }, { items: { $slice: 3 } });
-```
+
 
 10. **Q: Show last status of order 2**
-
-```
 db.orders.find({ _id: 2 }, { statusLogs: { $slice: -1 } });
-```
+
 
 ============================================================
 
@@ -344,10 +273,8 @@ db.collection.find(
   { $text: { $search: "term" } },
   { scoreField: { $meta: "textScore" } }
 )
-```
 
----
-
+-----------------------------------------------------------------
 ## **10 EXAMPLES WITH QUESTIONS**
 
 (Assume)
@@ -357,102 +284,80 @@ db.orders.createIndex({ customer: "text", "reviews.comment": "text" });
 ```
 
 1. **Q: Show text score for matching "Excellent"**
-
-```
 db.orders.find(
  { $text: { $search: "Excellent" } },
  { score: { $meta: "textScore" } }
 );
-```
+
 
 2. **Q: Sort results by textScore**
-
-```
 db.orders.find(
  { $text: { $search: "Good" } },
  { s: { $meta: "textScore" } }
 ).sort({ s: { $meta: "textScore" } });
-```
+
 
 3. **Q: Search two words and show rank**
-
-```
 db.orders.find(
  { $text: { $search: "good average" } },
  { rank: { $meta: "textScore" } }
 );
-```
+
 
 4. **Q: Return reviews + textScore**
-
-```
 db.orders.find(
  { $text: { $search: "excellent" } },
  { reviews: 1, score: { $meta: "textScore" } }
 );
-```
+
 
 5. **Q: Search exact phrase "Excellent"**
-
-```
 db.orders.find(
  { $text: { $search: "\"Excellent\"" } },
  { score: { $meta: "textScore" } }
 );
-```
+
 
 6. **Q: Search good but exclude 'bad'**
-
-```
 db.orders.find(
  { $text: { $search: "good -bad" } },
  { score: { $meta: "textScore" } }
 );
-```
+
 
 7. **Q: Filter by ID + get textScore**
-
-```
 db.orders.find(
  { $text: { $search: "Excellent" }, _id: 1 },
  { score: { $meta: "textScore" } }
 );
-```
+
 
 8. **Q: Search 'Loved' in comments**
-
-```
 db.orders.find(
  { $text: { $search: "Loved" } },
  { ms: { $meta: "textScore" } }
 );
-```
 
 9. **Q: Sort by customer name then score**
-
-```
 db.orders.find(
  { $text: { $search: "Good" } },
  { score: { $meta: "textScore" }, customer: 1 }
 ).sort({ customer: 1, score: { $meta: "textScore" } });
-```
+
 
 10. **Q: Only show the rank**
-
-```
 db.orders.find(
  { $text: { $search: "Average" } },
  { score: { $meta: "textScore" }, _id: 0 }
 );
-```
+
 
 ============================================================
 
-# **5) `$` POSITIONAL PROJECTION**
+# **5) $ POSITIONAL PROJECTION**
 
 ============================================================
 
----
 
 ## **THEORY (BULLET POINTS)**
 
@@ -471,76 +376,54 @@ db.orders.find(
 
 ## **SYNTAX**
 
-```
 db.collection.find(
   { "array.field": condition },
   { "array.$": 1 }
 )
-```
 
----
 
+
+---------------------------------------------------------------------
 ## **10 EXAMPLES WITH QUESTIONS**
 
 1. **Q: Show the array element where product='book'**
-
-```
 db.orders.find({ "items.product": "book" }, { "items.$": 1 });
-```
+
 
 2. **Q: Show item where price>100**
-
-```
 db.orders.find({ "items.price": { $gt: 100 } }, { "items.$": 1 });
-```
+
 
 3. **Q: Show item where qty>=10**
-
-```
 db.orders.find({ "items.qty": { $gte: 10 } }, { "items.$": 1 });
-```
+
 
 4. **Q: Show review where rating=5**
-
-```
 db.orders.find({ "reviews.rating": 5 }, { "reviews.$": 1 });
-```
+
 
 5. **Q: Show status where status='packed'**
-
-```
 db.orders.find({ "statusLogs.status": "packed" }, { "statusLogs.$": 1 });
-```
+
 
 6. **Q: Show element for product='bag'**
-
-```
 db.orders.find({ "items.product": "bag" }, { "items.$": 1 });
-```
+
 
 7. **Q: Show review rating<4**
-
-```
 db.orders.find({ "reviews.rating": { $lt: 4 } }, { "reviews.$": 1 });
-```
+
 
 8. **Q: Show item with price>=500**
-
-```
 db.orders.find({ "items.price": { $gte: 500 } }, { "items.$": 1 });
-```
+
 
 9. **Q: Show review rating 3 to 5**
-
-```
 db.orders.find({ "reviews.rating": { $gte: 3 } }, { "reviews.$": 1 });
-```
 
 10. **Q: Show delivered status**
-
-```
 db.orders.find({ "statusLogs.status": "delivered" }, { "statusLogs.$": 1 });
-```
+
 
 ============================================================
 
@@ -548,7 +431,6 @@ db.orders.find({ "statusLogs.status": "delivered" }, { "statusLogs.$": 1 });
 
 ============================================================
 
----
 
 ## **THEORY (BULLET POINTS)**
 
@@ -566,107 +448,84 @@ db.orders.find({ "statusLogs.status": "delivered" }, { "statusLogs.$": 1 });
 ---
 
 ## **SYNTAX**
-
-```
 db.collection.updateOne(
   { "array.field": condition },
   { $set: { "array.$.field": value } }
 )
-```
+
 
 ---
 
 ## **10 EXAMPLES WITH QUESTIONS**
 
 1. **Q: Change price of 'book' to 250**
-
-```
 db.orders.updateOne(
   { "items.product": "book" },
   { $set: { "items.$.price": 250 } }
 );
-```
+
 
 2. **Q: Change rating 5 → 4**
-
-```
 db.orders.updateOne(
   { "reviews.rating": 5 },
   { $set: { "reviews.$.rating": 4 } }
 );
-```
+
 
 3. **Q: Increase qty=10 → 11**
-
-```
 db.orders.updateOne(
   { "items.qty": 10 },
   { $set: { "items.$.qty": 11 } }
 );
-```
+
 
 4. **Q: Update comment of rating=3**
-
-```
 db.orders.updateOne(
   { "reviews.rating": 3 },
   { $set: { "reviews.$.comment": "Updated" } }
 );
-```
+
 
 5. **Q: Change 'packed' → 'done packing'**
-
-```
 db.orders.updateOne(
   { "statusLogs.status": "packed" },
   { $set: { "statusLogs.$.status": "done packing" } }
 );
-```
+
 
 6. **Q: Set price>500 → 650**
-
-```
 db.orders.updateOne(
   { "items.price": { $gt: 500 } },
   { $set: { "items.$.price": 650 } }
 );
-```
+
 
 7. **Q: Set rating >=3 to 10**
-
-```
 db.orders.updateOne(
   { "reviews.rating": { $gte: 3 } },
   { $set: { "reviews.$.rating": 10 } }
 );
-```
 
 8. **Q: Update pencil qty to 25**
-
-```
 db.orders.updateOne(
   { "items.product": "pencil" },
   { $set: { "items.$.qty": 25 } }
 );
-```
+
 
 9. **Q: shipped → out for delivery**
-
-```
 db.orders.updateOne(
   { "statusLogs.status": "shipped" },
   { $set: { "statusLogs.$.status": "out for delivery" } }
 );
-```
+
 
 10. **Q: Update comment 'bad' → 'Improved'**
-
-```
 db.orders.updateOne(
   { "reviews.comment": "bad" },
   { $set: { "reviews.$.comment": "Improved" } }
 );
-```
+
 
 ============================================================
 
@@ -685,9 +544,7 @@ db.orders.updateOne(
 
 ============================================================
 
-
-
 ============================================================
 
----
+
 
