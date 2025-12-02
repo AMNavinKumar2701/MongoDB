@@ -355,6 +355,57 @@ student> db.students.find({name:'Arjun'});
   }
 ]
 student> //so age is changed as 25.
+===========================================
+✅ What is updateOne() with upsert?
+===========================================
+updateOne(filter, update, options) normally:
+Updates the first document that matches filter.
+If NO document matches → nothing happens.
+
+But when you add:--------
+{ upsert: true }
+
+Then:
+👉 If a matching document exists → update it
+👉 If no document matches → insert a new document using filter + update fields
+
+So upsert = update + insert depending on condition.
+
+Lets see an example:-
+If update filter condition found----
+db.students.updateOne(
+  { name: "Arjun" },
+  { $set: { age: 25 } },
+  { upsert: true }
+);
+Meaning:
+If Arjun exists → update his age to 25.
+If Arjun does NOT exist → insert a new document:
+Output:---
+{ name: "Arjun", age: 25 }
+
+If update filter condition Not found----
+---------------------------------------------------------
+⭐ Example 2 — Student Does NOT Exist → Insert Happens
+------------------------------------------------------
+Assume no record with name "Rahul".
+
+Run:
+db.students.updateOne(
+  { name: "Rahul" },
+  { $set: { age: 20 } },
+  { upsert: true }
+)
+
+What MongoDB inserts:---
+{ 
+  _id: ObjectId(...),
+  name: "Rahul",     // from filter
+  age: 20            // from $set
+}
+
+✔ New document created
+✔ Because no match found, upsert triggered
 ===============================================================================================
 student> //3.2 updateMany()----Updates all documents matching the filter.
 ===============================================================================================
@@ -402,6 +453,113 @@ student> db.students.find({type:'movie'});
     type: 'movie'
   }
 ]
+---------------------------------------------------------------------------
+✅ What is updateMany() with upsert?
+Using your query:
+
+
+db.students.updateMany(
+  { type: "movie" },
+  { $set: { year: 2025 } },
+  { upsert: true }
+)
+
+
+
+* It will **update all matching documents**.
+* If **NO documents match**, then:
+  👉 **ONE new document is inserted** (not many)
+
+**Important rule:**
+➡️ updateMany upsert inserts **only ONE** document, not multiple.
+
+---
+
+# ⭐ **EXAMPLE 1 — Matches Exist → Only Updates (NO insert)**
+
+### Suppose your collection has:
+
+
+{ name:"A", type:"movie", year:2018 }
+{ name:"B", type:"movie", year:2020 }
+{ name:"C", type:"anime", year:2023 }
+```
+
+Run:
+
+
+db.students.updateMany(
+  { type: "movie" },
+  { $set: { year: 2025 } },
+  { upsert: true }
+)
+```
+
+### Result:
+
+Only documents with `type:"movie"` get updated:
+
+
+{ name:"A", type:"movie", year:2025 }
+{ name:"B", type:"movie", year:2025 }
+{ name:"C", type:"anime", year:2023 } // unchanged
+
+
+✔ Updates many
+✔ No insert because matches were found
+
+---
+
+# ⭐ **EXAMPLE 2 — No Matches → ONE New Document Inserted**
+
+### Suppose collection has **no movie documents**:
+
+
+{ name:"X", type:"science" }
+{ name:"Y", type:"sports" }
+
+
+Run:
+
+
+db.students.updateMany(
+  { type: "movie" },
+  { $set: { year: 2025 } },
+  { upsert: true }
+)
+```
+
+### Result:
+
+Since **no document has type:"movie"**, MongoDB inserts **ONE** new document:
+
+{
+  _id: ObjectId(...),
+  type: "movie",  // from filter
+  year: 2025      // from $set
+}
+
+
+✔ One document inserted
+✔ Because no match existed
+
+------------------------
+
+# 🧠 **Gun-Point Summary**
+
+* `updateMany()` → updates all matching docs
+* `upsert:true` → if none match, **insert only 1 doc**, not many
+* Inserted doc contains:
+
+  * all **filter** fields
+  * all **$set** fields
+* NOT inserted:
+
+  * fields like `$gt`/`$lt`/conditions used in filter
+
+---
+
+
 ===============================================================================================
 student> //3.3 replaceOne()-------Replaces entire document (except _id) with a new one.[no $set] needed
 ===============================================================================================
