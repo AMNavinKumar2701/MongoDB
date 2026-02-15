@@ -1,3 +1,5 @@
+Employees collections:---
+
 db.emp.insertMany([
   {
     empno: 7369,
@@ -142,6 +144,8 @@ db.emp.insertMany([
 ]);
 
 
+Department Collection:---
+
 db.dept.insertMany([
   { deptno: 10, dname: "accounting", loc: "new york" },
   { deptno: 20, dname: "research", loc: "dallas" },
@@ -149,6 +153,8 @@ db.dept.insertMany([
   { deptno: 40, dname: "operation", loc: "boston" },
 ]);
 
+
+orders collection:---
 
 
 db.orders.insertMany([
@@ -184,7 +190,7 @@ db.orders.insertMany([
 ]);
 
 
-
+customers collection:---
 
 db.customers.insertMany([
   {
