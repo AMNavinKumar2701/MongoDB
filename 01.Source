@@ -148,3 +148,110 @@ db.dept.insertMany([
   { deptno: 30, dname: "sales", loc: "chicago" },
   { deptno: 40, dname: "operation", loc: "boston" },
 ]);
+
+
+
+db.orders.insertMany([
+{
+   _id: 1,
+   customer: "Amit",
+   items: [
+          { product: "Pen", qty: 10, price: 20 },
+          { product: "Book", qty: 2, price: 200 },
+          { product: "Pencil", qty: 5, price: 10 }
+          ],
+   tags: ["stationery", "school", "low-price"]
+  },
+{
+   _id: 2,
+   customer: "Ravi",
+   items: [
+            { product: "Pen", qty: 5, price: 20 },
+            { product: "Bag", qty: 1, price: 500 }
+          ],
+    tags: ["office", "travel"]
+  },
+{
+   _id: 3,
+   customer: "John",
+   items: [
+            { product: "Laptop", qty: 1, price: 55000 },
+            { product: "Mouse", qty: 1, price: 500 },
+            { product: "Keyboard", qty: 1, price: 1500 }
+         ],
+    tags: ["electronics", "office", "premium"]
+  }
+]);
+
+
+
+
+db.customers.insertMany([
+  {
+    _id: 1,
+    name: "Alice",
+    age: 30,
+    balance: 100.5,
+    tags: ["premium", "email_verified"],
+    purchases: [
+      {
+        sku: "A1",
+        price: 20,
+        qty: 1,
+        date: ISODate("2025-01-01T00:00:00.000Z")
+      },
+      {
+        sku: "B2",
+        price: 35,
+        qty: 2,
+        date: ISODate("2025-02-20T00:00:00.000Z")
+      }
+    ],
+    meta: { visit: 5 },
+    flags: 0,
+    visits: 1,
+    lien: 30,
+    score: 10,
+    score1: 10
+  },
+  {
+    _id: 2,
+    name: "Bob",
+    age: 22,
+    balance: 5,
+    tags: ["diamond1"],
+    purchases: [],
+    meta: { visits: 0 },
+    flags: 2
+  },
+  {
+    _id: 3,
+    name: "Charlie",
+    age: 40,
+    balance: 999.99,
+    tags: ["gold", "silver"],
+    purchases: [
+      {
+        sku: "C3",
+        price: 100,
+        qty: 1,
+        date: ISODate("2025-03-10T00:00:00.000Z")
+      }
+    ],
+    meta: {},
+    flags: 1,
+    vip: true
+  }
+]);
+
+
+
+
+
+
+
+
+
+
+
+
